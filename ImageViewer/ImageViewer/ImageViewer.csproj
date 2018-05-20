@@ -171,6 +171,7 @@
     <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="ViewModel\FileExplorerViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\DisplayImageWindowViewModel.cs" />
+    <Compile Include="ViewModel\ImageWindowViewModels\FilterControlViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\ImageExplorerViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\ImagePresenterViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\PixelInformationViewModel.cs" />
@@ -187,6 +188,9 @@
     </Compile>
     <Compile Include="View\ImagesWindow\DisplayImageWindow.xaml.cs">
       <DependentUpon>DisplayImageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ImagesWindow\FilterControlView.xaml.cs">
+      <DependentUpon>FilterControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\ImagesWindow\ImageExplorerView.xaml.cs">
       <DependentUpon>ImageExplorerView.xaml</DependentUpon>
@@ -232,6 +236,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\ImagesWindow\DisplayImageWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ImagesWindow\FilterControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

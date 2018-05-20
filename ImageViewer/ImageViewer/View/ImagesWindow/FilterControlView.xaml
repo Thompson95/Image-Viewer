@@ -1,0 +1,33 @@
+﻿<Controls:MetroWindow x:Class="ImageViewer.View.ImagesWindow.SaveRegionWindow"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:local="clr-namespace:ImageViewer.View.ImagesWindow"
+            xmlns:models="clr-namespace:ImageViewer.ViewModel.ImageWindowViewModels"
+            xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+            mc:Ignorable="d"
+            Title="Filter control"         
+            ShowInTaskbar="False"
+            ShowCloseButton="True"
+            ShowMinButton="False"
+            ShowMaxRestoreButton="False"    
+            Topmost="True"
+            WindowTransitionsEnabled="False"
+            WindowStartupLocation="CenterScreen"
+            WindowTitleBrush="#8BC34A"
+            BorderBrush="#8BC34A"
+            Height="150" Width="400">
+
+    <!--<Window.DataContext>
+        <models:FilterControlViewModel/>
+    </Window.DataContext>-->
+
+    <Border BorderBrush="#FF4B6828" BorderThickness="3" Background="#FFE7E7E7">
+        <Grid>
+            <Grid.ColumnDefinitions>
+
+            </Grid.ColumnDefinitions>
+        </Grid>
+    </Border>
+</Controls:MetroWindow>

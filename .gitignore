@@ -1,2 +1,6 @@
 *.lref
 *.lock
+*.cs
+*.cache
+ImageViewer/ImageViewer/obj/
+ImageViewer/.vs/ImageViewer/v15/
