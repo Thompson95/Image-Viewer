@@ -29,7 +29,7 @@ namespace ImageViewer.Model
             return result;
         }
 
-        public static BitmapSource Sepia(BitmapSource source)
+        public static BitmapSource Sepia(BitmapSource source, Int16 value)
         {
             return source;
         }

@@ -189,8 +189,8 @@
     <Compile Include="View\ImagesWindow\DisplayImageWindow.xaml.cs">
       <DependentUpon>DisplayImageWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\ImagesWindow\FilterControlView.xaml.cs">
-      <DependentUpon>FilterControlView.xaml</DependentUpon>
+    <Compile Include="View\ImagesWindow\FilterControlWindow.xaml.cs">
+      <DependentUpon>FilterControlWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\ImagesWindow\ImageExplorerView.xaml.cs">
       <DependentUpon>ImageExplorerView.xaml</DependentUpon>
@@ -239,7 +239,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\ImagesWindow\FilterControlView.xaml">
+    <Page Include="View\ImagesWindow\FilterControlWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

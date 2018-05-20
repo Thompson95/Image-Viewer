@@ -84,7 +84,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                     ImageSource = DisplayedImage.Bitmap;
                     ImagePosition = DisplayedImage.Position;
                     ImageSize = $"{ImageSource.PixelWidth} x {ImageSource.PixelHeight}";
-                    CalculateRegionProperties();
+                    //CalculateRegionProperties();
                 }
                 else
                 {
@@ -530,21 +530,21 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 case Filter.Filters.Brightness:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Negative(temp.Bitmap);
+                        temp.Bitmap = Filter.Brightness(temp.Bitmap);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.Contrast:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Negative(temp.Bitmap);
+                        temp.Bitmap = Filter.Contrast(temp.Bitmap);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.Sepia:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Negative(temp.Bitmap);
+                        temp.Bitmap = Filter.Sepia(temp.Bitmap, fe.Value);
                         DisplayedImage = temp;
                     }
                     break;
@@ -558,7 +558,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 case Filter.Filters.GreyScale:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Negative(temp.Bitmap);
+                        temp.Bitmap = Filter.GreyScale(temp.Bitmap);
                         DisplayedImage = temp;
                     }
                     break;
@@ -573,6 +573,11 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             FilterEvent fe = new FilterEvent();
             fe.Filter = (Filter.Filters)filter;
             fe.PresenterID = this.PresenterID;
+            fe.Value = 0;
+            if(fe.Filter != Filter.Filters.Negative && fe.Filter != Filter.Filters.None)
+            {
+                FilterControlWindow.Instance.Show();
+            }
 
             if (IsSynchronized)
             {
