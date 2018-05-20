@@ -1,0 +1,423 @@
+﻿<UserControl x:Class="ImageViewer.View.ImagesWindow.ToolBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageViewer.View.ImagesWindow"
+             xmlns:models="clr-namespace:ImageViewer.ViewModel.ImageWindowViewModels"
+             xmlns:views="clr-namespace:ImageViewer.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="1000">
+
+    <UserControl.DataContext>
+        <models:ToolBarViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Background="#616161">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="0.1*"/>
+            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="0.1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="3" Grid.Column="1" Background="#E0E0E0" BorderBrush="DarkGray" BorderThickness="3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="1x1" FontWeight="Bold" Command="{Binding GridOneCommand}"  Grid.Column="0" ToolTip="1x1 window" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GridStatus}" Value="OneToOne">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="1x2" FontWeight="Bold" Command="{Binding GridOneToTwoCommand}"  Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="1x2 window">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GridStatus}" Value="OneToTwo">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="2x2" FontWeight="Bold" Command="{Binding GridTwoToTwoCommand}"  Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="2x2 window">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GridStatus}" Value="TwoToTwo">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="3x3" FontWeight="Bold" Command="{Binding GridThreeToTreeCommand}"  Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="3x3 window">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GridStatus}" Value="ThreeToThree">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" Grid.Column="1" Background="#E0E0E0" BorderBrush="DarkGray" BorderThickness="3">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button  Command="{Binding CreateRegionToolCommand}"  Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Region selection">
+                    <StackPanel>
+                        <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_vector_rectangle}"/>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Tool}" Value="RegionSelection">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Command="{Binding SerializeOutputFromPresenters}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Save region images of each window">
+                    <StackPanel>
+                        <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_save}"/>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Command="{Binding CreatePixelPickerToolCommand}" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Pixel informations">
+                    <StackPanel>
+                        <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_cursor_information}"/>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Tool}" Value="PixelInformations">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Command="{Binding PanImageToolCommand}" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Region transformation">
+                    <StackPanel>
+                        <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_cursor_move}"/>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Tool}" Value="ImagePan">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+              <Button Command="{Binding CreateRotateImageToolCommand}" Grid.Column="4"  VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Rotate">
+                <StackPanel>
+                  <Rectangle Width="16" Height="16"
+             Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                    <Rectangle.OpacityMask>
+                      <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_transform_rotate_clockwise}"/>
+                    </Rectangle.OpacityMask>
+                  </Rectangle>
+                </StackPanel>
+                <Button.Style>
+                  <Style TargetType="Button" BasedOn="{StaticResource WhiteGreenButton}">
+                    <Setter Property="Template">
+                      <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                          <Border CornerRadius="6" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#FF8BC34A">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Border>
+                        </ControlTemplate>
+                      </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                                <DataTrigger Binding="{Binding Tool}" Value="Rotate">
+                        <Setter Property="Template">
+                          <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                              <Border CornerRadius="6" Background="#FFF3FFE4" BorderThickness="2" BorderBrush="#FF8BC34A">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                              </Border>
+                            </ControlTemplate>
+                          </Setter.Value>
+                        </Setter>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Button.Style>
+              </Button>
+            </Grid>
+        </Border>
+
+
+        <TabControl Grid.Column="3" Grid.Row="1" Grid.RowSpan="3">
+            <TabItem >
+                <TabItem.Header>
+                    <TextBlock Text="Images" Foreground="#FF8BC34A" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontWeight" Value="Normal"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=IsSelected}" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </TabItem.Header>
+                <TabItem.Style>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Background" Value="White"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Gray"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabItem.Style>
+                <Grid>
+                    <local:ImageExplorerView ClipToBounds="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="Regions" Foreground="#FF8BC34A" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontWeight" Value="Normal"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=IsSelected}" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </TabItem.Header>
+                <TabItem.Style>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Background" Value="White"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Gray"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabItem.Style>
+                <Grid>
+                    <local:RegionExplorerView ClipToBounds="True"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button Command="{Binding HideToolBarCommand}" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="4" Foreground="White" Width="50" Height="20" VerticalAlignment="Bottom">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="12" Height="12"
+                    Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_up}"/>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="#FF8BC34A"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border CornerRadius="15, 15, 0, 0" Background="{TemplateBinding Background}" BorderThickness="1">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FF97C661"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+    </Grid>
+</UserControl>

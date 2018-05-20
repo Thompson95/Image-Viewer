@@ -1,0 +1,183 @@
+﻿<UserControl x:Class="ImageViewer.View.ImagesWindow.ImagePresenterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageViewer.View.ImagesWindow"
+             xmlns:models="clr-namespace:ImageViewer.ViewModel.ImageWindowViewModels"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:Command="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
+             xmlns:mouse="clr-namespace:ImageViewer.Methods.MouseBehaviour"
+             xmlns:model="clr-namespace:ImageViewer.Model"
+             xmlns:methods="clr-namespace:ImageViewer.Methods"
+             mc:Ignorable="d" 
+             ClipToBounds="True"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Focusable="True"
+             Background="Black"
+             >
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="Focusable" Value="True"/>
+            <Setter Property="Background" Value="Black"/>
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="Background" Value="Wheat"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+
+    <Border x:Name="border"  BorderThickness="3">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush" Value="#FF8BC34A"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSynchronized}" Value="False">
+                        <Setter Property="BorderBrush" Value="Red"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
+                <Grid Focusable="True" ClipToBounds="True" HorizontalAlignment="Stretch">
+                    <Grid.Background>
+                        <ImageBrush Stretch="UniformToFill">
+                            <ImageBrush.ImageSource>
+                                <BitmapImage UriSource="pack://application:,,,/Resources/Images/AlphaBackground.jpg"/>
+                            </ImageBrush.ImageSource>
+                        </ImageBrush>
+                    </Grid.Background>
+                    <Grid>
+                        <Image ClipToBounds="True" Focusable="False" Source="{Binding ImageSource}" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="Uniform" Margin="{Binding ImagePosition}" >
+                            <Image.RenderTransform>
+                                <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}"/>
+                            </Image.RenderTransform>
+                        </Image>
+                        <Rectangle StrokeThickness="1" Width="{Binding RegionWidth}" Height="{Binding RegionHeight}" Fill="Transparent" Margin="{Binding RegionLocation}" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTipService.ShowDuration="3600000" ToolTipService.InitialShowDelay="1500">
+                            <Rectangle.ToolTip>
+                                <ToolTip>
+                                    <local:RegionInformationView Margin="0"/>
+                                </ToolTip>
+                            </Rectangle.ToolTip>
+                            <Rectangle.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Save region" Command="{Binding SaveRegionCommand}" CommandParameter="{Binding}"/>
+                                    <MenuItem Header="Serialize output" Command="{Binding SerializeOutputFromListCommand}" CommandParameter="{Binding}"/>
+                                </ContextMenu>
+                            </Rectangle.ContextMenu>
+                            <Rectangle.Stroke>
+                                <LinearGradientBrush x:Name="StrokeColor" StartPoint="0,0" EndPoint="0.005, 0.005" SpreadMethod="Reflect">
+                                    <GradientStop Color="Black" Offset="1"/>
+                                    <GradientStop Color="White" Offset="0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Stroke>
+                        </Rectangle>
+                    </Grid>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonUp">
+                            <Command:EventToCommand Command="{Binding ImageClickCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseLeftButtonDown">
+                            <Command:EventToCommand Command="{Binding MouseLeftClickCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseMove">
+                            <Command:EventToCommand Command="{Binding MouseMoveCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseEnter">
+                            <Command:EventToCommand Command="{Binding MouseOverCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseWheel">
+                            <Command:EventToCommand Command="{Binding MouseWheelCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Grid>
+                <ScrollViewer.InputBindings>
+                    <KeyBinding Key="Left" Modifiers="" Command="{Binding LeftArrowCommand}"/>
+                    <KeyBinding Key="Right" Modifiers="" Command="{Binding RightArrowCommand}"/>
+                    <KeyBinding Key="Esc" Modifiers="" Command="{Binding EscapeCommand}"/>
+                    <KeyBinding Key="A" Modifiers="Ctrl" Command="{Binding SelectAllCommand}"/>
+                </ScrollViewer.InputBindings>
+            </ScrollViewer>
+            <Grid Grid.Column="0" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding IncrementedIndex}" Foreground="#FF8BC34A" Grid.Column="0" Margin="2" VerticalAlignment="Top" HorizontalAlignment="Stretch" FontWeight="Bold" FontSize="22"/>
+                <TextBlock Text="{Binding DisplayedImage.FilePath}" Foreground="#FF999999" Grid.Column="1" Margin="8, 2, 2, 2" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold">
+                    <TextBlock.ToolTip>
+                        <ToolTip>
+                            <TextBlock Text="{Binding ImagePath}" Background="White" Foreground="Black" Grid.Row="0" Grid.Column="1" Margin="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <TextBlock Text="{Binding ImageSize}" Foreground="#FF999999" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold" Margin="8, 2, 2, 2">
+                    <TextBlock.ToolTip>
+                        <ToolTip>
+                            <TextBlock Text="{Binding ImageSize}" Background="White" Foreground="Black" Grid.Row="0" Grid.Column="1" Margin="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <TextBlock Text="Zoom: x" Foreground="#FF999999" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold" Margin="8, 2, 2, 2">
+                    <TextBlock.ToolTip>
+                        <ToolTip>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Zoom: x" Background="White" Grid.Column="0" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold" Margin="2"/>
+                                <TextBlock Text="{Binding Scale}" Background="White" Grid.Column="1" Foreground="Black" Margin="0, 2, 2, 2" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                            </Grid>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <TextBlock Text="{Binding Scale}" Foreground="#FF999999" Grid.Row="0" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold" Margin="0, 2, 2, 2">
+                    <TextBlock.ToolTip>
+                        <ToolTip>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Zoom: x" Background="White" Grid.Column="0" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold" Margin="2"/>
+                                <TextBlock Text="{Binding Scale}" Background="White" Grid.Column="1" Foreground="Black" Margin="0, 2, 2, 2" VerticalAlignment="Center" HorizontalAlignment="Stretch" FontWeight="Bold"/>
+                            </Grid>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+
+            </Grid>
+            <i:Interaction.Behaviors>
+                <mouse:MouseManagement MouseX="{Binding MouseX, Mode=OneWayToSource}" MouseY="{Binding MouseY, Mode=OneWayToSource}" />
+            </i:Interaction.Behaviors>
+        </Grid>
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Reset position" Command="{Binding ResetPositionCommand}" CommandParameter="{Binding}"/>
+                <MenuItem Header="Reset zoom" Command="{Binding ResetZoomCommand}" CommandParameter="{Binding}"/>
+                <MenuItem Header="Filters">
+                        <MenuItem Header="Contrast" Command="{Binding Filter_ContrastCommand}" CommandParameter="{x:Static model:Filter+Filters.Contrast}"/>
+                    <MenuItem Header="Brightness" Command="{Binding Filter_BrightnessCommand}" CommandParameter="{x:Static model:Filter+Filters.Brightness}"/>
+                    <MenuItem Header="Grey Scale" Command="{Binding Filter_GreyScaleCommand}" CommandParameter="{x:Static model:Filter+Filters.GreyScale}"/>
+                    <MenuItem Header="Sepia" Command="{Binding Filter_SepiaCommand}" CommandParameter="{x:Static model:Filter+Filters.Sepia}"/>
+                    <MenuItem Header="Negative" Command="{Binding Filter_NegativeCommand}" CommandParameter="{x:Static model:Filter+Filters.Negative}"/>
+                        <Separator/>
+                    <MenuItem Header="Reset filters" Command="{Binding Filter_ResetCommand}" CommandParameter="{x:Static model:Filter+Filters.None}"/>
+                </MenuItem>
+            </ContextMenu>
+        </Border.ContextMenu>
+    </Border>
+</UserControl>

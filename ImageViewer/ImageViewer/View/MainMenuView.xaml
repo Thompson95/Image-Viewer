@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="ImageViewer.View.MainMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageViewer.View"
+             xmlns:model="clr-namespace:ImageViewer.ViewModel"  
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="StylesDictionaries/ButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.DataContext>
+        <model:MainMenuViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Background="#616161">
+        <StackPanel Style="{StaticResource StackPanelStyle}" Orientation="Horizontal" Grid.Row="0" ToolTip="Open Images">
+
+            <Button x:Name="Open" Command="{Binding DialogCommand}" Margin="7,0,7,0">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_book_open}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Text=" Open Files"
+                   VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="ClearAll" Command="{Binding ClearCommand}" Margin="0,0,7,0" ToolTip="Clear Images">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_clean}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Text=" Clear Images"
+                   VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="Help" Command="{Binding HelpCommand}" Margin="0,0,7,0" ToolTip="Help">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="16" Height="16"
+                       Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_question}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Text=" Help"
+                       VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Button>
+
+            <Button Command="{Binding ExitCommand}" Margin="0,0,7,0" ToolTip="Exit" >
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_door_leave}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Text=" Exit"
+                   VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,98 @@
+﻿<UserControl x:Class="ImageViewer.View.FileExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:local="clr-namespace:ImageViewer.View"
+             xmlns:model="clr-namespace:ImageViewer.Model" 
+             xmlns:viewModel="clr-namespace:ImageViewer.ViewModel"  
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             Loaded="FileExplorer_Loaded"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.DataContext>
+        <viewModel:FileExplorerViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="StylesDictionaries/ButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <Grid Background="#616161">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid FlowDirection="RightToLeft" Background="#E0E0E0" Grid.Row="0" Margin="2, 0, 0, 1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Name="btnCollapse" Command="{Binding CollapseCommand}" Style="{StaticResource WhiteGreenButton}" Grid.Column="0">
+                <StackPanel>
+                    <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_layout_collapse_right}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+                <Button.ToolTip>
+                    <ToolTip>
+                        <TextBlock Text="Hide/Show"/>
+                    </ToolTip>
+                </Button.ToolTip>
+            </Button>
+            <Button Command="{Binding CollapseAllCommand}" Style="{StaticResource WhiteGreenButton}" Grid.Column="1">
+                <StackPanel>
+                    <Rectangle Width="16" Height="16"
+                   Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_refresh}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+                <Button.ToolTip>
+                    <ToolTip>
+                        <TextBlock Text="Refresh and collapse"/>
+                    </ToolTip>
+                </Button.ToolTip>
+            </Button>
+        </Grid>
+
+        <TreeView x:Name="FolderTreeView" Grid.Row="2" Grid.Column="1" Margin="2, 1, 0, 1" AllowDrop="True">
+            <TreeView.Resources>
+                <Style TargetType="{x:Type model:TreeViewItemImage}">
+                    <EventSetter Event="MouseDoubleClick" Handler="TreeView_PreviewMouseDoubleClick"/>
+                    <EventSetter Event="MouseMove" Handler="TreeViewItemImage_MouseMove"/>
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Width="20" Margin="3" Source="{Binding 
+                                                                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type model:TreeViewItemImage}},
+                                                                            Path=ImageSource
+                                                                            }"/>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.Resources>
+        </TreeView>
+    </Grid>
+</UserControl>
