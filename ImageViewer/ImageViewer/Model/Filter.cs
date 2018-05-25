@@ -29,11 +29,11 @@ namespace ImageViewer.Model
             return result;
         }
 
-        public static BitmapSource Sepia(BitmapSource source, Int16 value)
+        public static BitmapSource Sepia(BitmapSource source, Byte value)
         {
             return source;
         }
-        public static BitmapSource Brightness(BitmapSource source)
+        public static BitmapSource Brightness(BitmapSource source, Byte value)
         {
             return source;
         }
@@ -41,7 +41,7 @@ namespace ImageViewer.Model
         {
             return source;
         }
-        public static BitmapSource Contrast(BitmapSource source)
+        public static BitmapSource Contrast(BitmapSource source, Byte value)
         {
             return source;
         }

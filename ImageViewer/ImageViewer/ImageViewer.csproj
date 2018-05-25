@@ -130,6 +130,7 @@
     <Compile Include="Model\Event\ResetRegionsEvent.cs" />
     <Compile Include="Model\Event\RotateImageEvent.cs" />
     <Compile Include="Model\Event\SendDisplayedImage.cs" />
+    <Compile Include="Model\Event\SendFilterValueEvent.cs" />
     <Compile Include="Model\Event\SendPixelInformationEvent.cs" />
     <Compile Include="Methods\MouseManagement.cs" />
     <Compile Include="Model\Event\SendPixelInformationViewEvent.cs" />

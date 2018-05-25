@@ -10,9 +10,10 @@
         xmlns:converter="clr-namespace:ImageViewer.Converters"
         xmlns:Command="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
         mc:Ignorable="d"
-        Title="Filter control" Height="100" Width="300"
-        ResizeMode="NoResize"
-        IsMaxRestoreButtonEnabled="False"
+        Title="{Binding Path=FilterName, Mode=OneWay}" Height="100" Width="300"
+        ResizeMode="CanMinimize"
+        ShowCloseButton="False"
+        ShowMaxRestoreButton="False"
         ShowInTaskbar="False" 
         BorderBrush="#8BC34A"
         WindowTitleBrush="#8BC34A"
@@ -20,12 +21,12 @@
         Topmost="True"
         MinHeight="50" MinWidth="200"
         Background="White">
-    
+
     <Window.DataContext>
         <model:FilterControlViewModel/>
     </Window.DataContext>
 
-    <!--<Window.Resources>
+    <Window.Resources>
         <converter:IsNullConverter x:Key="isNull"/>
         <Style TargetType="ContentControl" x:Key="ContentControlStyle">
             <Setter Property="Visibility" Value="Visible"/>
@@ -46,7 +47,7 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-    </Window.Resources>-->
+    </Window.Resources>
 
     <Grid Margin="0" ClipToBounds="True">
         <!--<Grid.ColumnDefinitions>
@@ -60,8 +61,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>-->
         <DockPanel VerticalAlignment="Center" Margin="10">
-            <TextBox x:Name="inputBox" Width="40" HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="#FF8BC34A" DockPanel.Dock="Right" Text="{Binding FilterValue, Mode=TwoWay}" TextAlignment="Right" MaxLines="1" MaxLength="3" MinLines="1"/>
-            <Slider x:Name="slValue" Maximum="255" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Stretch" Value="{Binding FilterValue, Mode=TwoWay}"/>
+            <TextBox x:Name="inputBox" Width="40" HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="#FF8BC34A" DockPanel.Dock="Right" Text="{Binding ElementName=slValue, Path=Value}" TextAlignment="Right" MaxLines="1" MaxLength="3" MinLines="1" TextChanged="inputBox_TextChanged" PreviewTextInput="NumberValidationTextBox"/>
+            <Slider x:Name="slValue" Maximum="255" Minimum="0" TickFrequency="1" Ticks="256" VerticalAlignment="Center" HorizontalAlignment="Stretch" Value="{Binding Path=FilterValue, Mode=TwoWay}"/>
         </DockPanel>
 
 

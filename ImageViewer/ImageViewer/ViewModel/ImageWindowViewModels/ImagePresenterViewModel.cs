@@ -192,8 +192,8 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                     }
                     if (!_subscriptionTokens.ContainsKey(typeof(FilterEvent)))
                     {
-                        token = _aggregator.GetEvent<FilterEvent>().Subscribe(ApplyFilter);
-                        _subscriptionTokens.Add(typeof(FilterEvent), token);
+                        token = _aggregator.GetEvent<SendFilterValueEvent>().Subscribe(ApplyFilter);
+                        _subscriptionTokens.Add(typeof(SendFilterValueEvent), token);
                     }
                 }
                 else
@@ -208,8 +208,8 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                     _subscriptionTokens.Remove(typeof(ZoomEvent));
                     _aggregator.GetEvent<SynchronizeRotationEvent>().Unsubscribe(_subscriptionTokens[typeof(SynchronizeRotationEvent)]);
                     _subscriptionTokens.Remove(typeof(SynchronizeRotationEvent));
-                    _aggregator.GetEvent<FilterEvent>().Unsubscribe(_subscriptionTokens[typeof(FilterEvent)]);
-                    _subscriptionTokens.Remove(typeof(FilterEvent));
+                    _aggregator.GetEvent<SendFilterValueEvent>().Unsubscribe(_subscriptionTokens[typeof(SendFilterValueEvent)]);
+                    _subscriptionTokens.Remove(typeof(SendFilterValueEvent));
                 }
                 NotifyPropertyChanged();
             }
@@ -512,7 +512,6 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
 
 
         #region Private methods
-
         private void ApplyFilter(FilterEvent fe)
         {
             if (!IsSynchronized && fe.PresenterID != PresenterID)
@@ -530,14 +529,14 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 case Filter.Filters.Brightness:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Brightness(temp.Bitmap);
+                        temp.Bitmap = Filter.Brightness(temp.Bitmap, fe.Value);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.Contrast:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Contrast(temp.Bitmap);
+                        temp.Bitmap = Filter.Contrast(temp.Bitmap, fe.Value);
                         DisplayedImage = temp;
                     }
                     break;
@@ -574,14 +573,17 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             fe.Filter = (Filter.Filters)filter;
             fe.PresenterID = this.PresenterID;
             fe.Value = 0;
-            if(fe.Filter != Filter.Filters.Negative && fe.Filter != Filter.Filters.None)
+            if(fe.Filter != Filter.Filters.Negative && fe.Filter != Filter.Filters.None && fe.Filter != Filter.Filters.GreyScale)
             {
-                FilterControlWindow.Instance.Show();
+                if (FilterControlWindow.Instance.Visibility == Visibility.Collapsed)
+                {
+                    FilterControlWindow.Instance.Visibility = Visibility.Visible;
+                }
             }
 
             if (IsSynchronized)
             {
-                _aggregator.GetEvent<FilterEvent>().Publish(fe);
+                _aggregator.GetEvent<SendFilterValueEvent>().Publish(fe);
             }
             else
                 ApplyFilter(fe);
