@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,10 +17,12 @@ namespace ImageViewer.Model
 
         public static BitmapSource Negative(BitmapSource source)
         {
+            AsmProxy proxy = new AsmProxy();
             int stride = (int)(source.PixelWidth * 4);
             int size = (int)(source.PixelHeight * stride);
             byte[] pixels = new byte[size];
             source.CopyPixels(pixels, stride, 0);
+            Debug.WriteLine(proxy.executeAsmNegativeFilter());
             for (int i = 0; i < size; i++)
             {
                 if (i % 4 != 3)
