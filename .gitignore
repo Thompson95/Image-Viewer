@@ -5,3 +5,7 @@ ImageViewer/ImageViewer/obj/
 ImageViewer/.vs/ImageViewer/v15/
 *.pdb
 *.exe
+*.dll
+ImageViewer/ImageViewer/bin/
+ImageViewer/Asm/Debug/
+*.log
