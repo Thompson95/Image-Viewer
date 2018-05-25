@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -122,6 +123,7 @@
     <Compile Include="Methods\ImageSaver.cs" />
     <Compile Include="Methods\OutputSerializer.cs" />
     <Compile Include="Methods\RelayCommand.cs" />
+    <Compile Include="Model\AsmProxy.cs" />
     <Compile Include="Model\Event\DisposeEvent.cs" />
     <Compile Include="Model\Event\FilterEvent.cs" />
     <Compile Include="Model\Event\GridStatusEvent.cs" />
