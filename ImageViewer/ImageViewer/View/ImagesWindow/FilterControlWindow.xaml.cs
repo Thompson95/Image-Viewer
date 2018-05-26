@@ -72,19 +72,19 @@ namespace ImageViewer.View.ImagesWindow
             e.Handled = regex.IsMatch(e.Text);
         }
 
-        private void inputBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            String text = inputBox.Text;
-            double actualValue = 0;
-            if (text != String.Empty)
-                actualValue = double.Parse(text);
-            if (actualValue > 255)
-            {
-                actualValue = 255;
-            }
-            byte value = (byte)actualValue;
-            inputBox.Text = value.ToString();
-        }
+        //private void inputBox_TextChanged(object sender, TextChangedEventArgs e)
+        //{
+        //    String text = inputBox.Text;
+        //    double actualValue = 0;
+        //    if (text != String.Empty)
+        //        actualValue = double.Parse(text);
+        //    if (actualValue > 255)
+        //    {
+        //        actualValue = 255;
+        //    }
+        //    byte value = (byte)actualValue;
+        //    inputBox.Text = value.ToString();
+        //}
 
         public void Dispose()
         {

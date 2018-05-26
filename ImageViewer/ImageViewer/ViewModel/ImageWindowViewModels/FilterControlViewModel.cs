@@ -58,13 +58,16 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             filterValues.Add(Filter.Filters.Brightness, 0);
             filterValues.Add(Filter.Filters.Contrast, 0);
             filterValues.Add(Filter.Filters.Sepia, 0);
-
+            filterValues.Add(Filter.Filters.Negative, 0);
+            filterValues.Add(Filter.Filters.GrayScale, 0);
+            filterValues.Add(Filter.Filters.None, 0);
+            
             _aggregator.GetEvent<FilterEvent>().Subscribe((fe) =>
             {
                 filter = fe.Filter;
                 FilterName = filter.ToString();
                 FilterValue = filterValues[filter].ToString();
-            PresenterID = fe.PresenterID;
+                PresenterID = fe.PresenterID;
             });
         }
 

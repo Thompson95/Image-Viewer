@@ -171,7 +171,7 @@
                 <MenuItem Header="Filters">
                         <MenuItem Header="Contrast" Command="{Binding Filter_ContrastCommand}" CommandParameter="{x:Static model:Filter+Filters.Contrast}"/>
                     <MenuItem Header="Brightness" Command="{Binding Filter_BrightnessCommand}" CommandParameter="{x:Static model:Filter+Filters.Brightness}"/>
-                    <MenuItem Header="Grey Scale" Command="{Binding Filter_GreyScaleCommand}" CommandParameter="{x:Static model:Filter+Filters.GreyScale}"/>
+                    <MenuItem Header="Gray Scale" Command="{Binding Filter_GrayScaleCommand}" CommandParameter="{x:Static model:Filter+Filters.GrayScale}"/>
                     <MenuItem Header="Sepia" Command="{Binding Filter_SepiaCommand}" CommandParameter="{x:Static model:Filter+Filters.Sepia}"/>
                     <MenuItem Header="Negative" Command="{Binding Filter_NegativeCommand}" CommandParameter="{x:Static model:Filter+Filters.Negative}"/>
                         <Separator/>

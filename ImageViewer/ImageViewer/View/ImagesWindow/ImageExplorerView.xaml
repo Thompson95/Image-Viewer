@@ -22,27 +22,33 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="10*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical">
-        <Button  Command="{Binding DialogCommandList}" Style="{StaticResource WhiteGreenButton}" Margin="0" ToolTip="Add image lists" Width="25" Height="25">
-            <StackPanel>
-                <Rectangle Width="16" Height="16"
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Button Grid.Row="0" Command="{Binding DialogCommandList}" Style="{StaticResource WhiteGreenButton}" Margin="0" ToolTip="Add image lists" Width="25" Height="25">
+                    <StackPanel>
+                        <Rectangle Width="16" Height="16" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}"/>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="3" Command="{Binding DialogCommandImage}" Style="{StaticResource WhiteGreenButton}" Margin="0" ToolTip="Add images" Width="25" Height="25">
+                    <StackPanel>
+                        <Rectangle Width="16" Height="16"
                                             Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
-                    <Rectangle.OpacityMask>
-                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}"/>
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-            </StackPanel>
-        </Button>
-        <Button  Command="{Binding DialogCommandImage}" Style="{StaticResource WhiteGreenButton}" Margin="0" ToolTip="Add images" Width="25" Height="25">
-            <StackPanel>
-                <Rectangle Width="16" Height="16"
-                                            Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
-                    <Rectangle.OpacityMask>
-                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}"/>
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-            </StackPanel>
-        </Button>
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}"/>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </StackPanel>
         <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto" Grid.Column="1">
             <ItemsControl x:Name="imageList" ItemsSource="{Binding Path=ImageList}">

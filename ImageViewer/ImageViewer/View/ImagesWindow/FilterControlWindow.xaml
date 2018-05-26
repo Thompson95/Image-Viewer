@@ -10,7 +10,7 @@
         xmlns:converter="clr-namespace:ImageViewer.Converters"
         xmlns:Command="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
         mc:Ignorable="d"
-        Title="{Binding Path=FilterName, Mode=OneWay}" Height="100" Width="300"
+        Title="Filter Window" Width="300" Height="Auto"
         ResizeMode="CanMinimize"
         ShowCloseButton="False"
         ShowMaxRestoreButton="False"
@@ -49,22 +49,59 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="0" ClipToBounds="True">
-        <!--<Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="5"/>
-        </Grid.ColumnDefinitions>
+    <Grid Margin="0" VerticalAlignment="Top">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>-->
-        <DockPanel VerticalAlignment="Center" Margin="10">
-            <TextBox x:Name="inputBox" Width="40" HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="#FF8BC34A" DockPanel.Dock="Right" Text="{Binding ElementName=slValue, Path=Value}" TextAlignment="Right" MaxLines="1" MaxLength="3" MinLines="1" TextChanged="inputBox_TextChanged" PreviewTextInput="NumberValidationTextBox"/>
-            <Slider x:Name="slValue" Maximum="255" Minimum="0" TickFrequency="1" Ticks="256" VerticalAlignment="Center" HorizontalAlignment="Stretch" Value="{Binding Path=FilterValue, Mode=TwoWay}"/>
-        </DockPanel>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0"  Margin="5" BorderBrush="Gray" BorderThickness="1" Height="80">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="#dddddd"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#eeeeee" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="2*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="{Binding FilterName, Mode=OneWay}" Foreground="#8BC34A" Margin="5 3 5 0" VerticalAlignment="Bottom" FontWeight="Bold" FontSize="15"/>
+                <Grid Grid.Row="1" VerticalAlignment="Center" Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <!--<TextBox x:Name="inputBox" Width="40" HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="#FF8BC34A" DockPanel.Dock="Right" Text="{Binding ElementName=slValue, Path=Value}" TextAlignment="Right" MaxLines="1" MaxLength="3" MinLines="1" TextChanged="inputBox_TextChanged" PreviewTextInput="NumberValidationTextBox"/>-->
+                    <Slider x:Name="slValue" Grid.Column="0" Maximum="255" Minimum="0" TickFrequency="1" Ticks="256" VerticalAlignment="Center" HorizontalAlignment="Stretch" Value="{Binding Path=FilterValue, Mode=TwoWay}" Margin="0 0 0 0" Foreground="#8BC34A" />
+                    <Button Grid.Column="2" Command="{Binding DialogCommandList}" Style="{StaticResource WhiteGreenButton}" Margin="0" ToolTip="Delete filter" Width="25" Height="25">
+                        <StackPanel>
+                            <Rectangle Width="16" Height="16" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_delete}"/>
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
 
-
+        <Button Grid.Row="2" Command="{Binding DialogCommandList}" Style="{StaticResource WhiteGreenButton}" Margin="0" ToolTip="Add filter" Width="25" Height="25">
+            <StackPanel>
+                <Rectangle Width="16" Height="16" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" HorizontalAlignment="Left">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}"/>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </StackPanel>
+        </Button>
     </Grid>
 </Controls:MetroWindow>
