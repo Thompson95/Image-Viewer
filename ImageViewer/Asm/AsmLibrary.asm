@@ -2,6 +2,8 @@
 asmNegativeFilter proc
 	mov r10, 0
 	mov r11, rbx
+	mov r9, rdx
+	mov r8, rcx
 	mov rbx, 4
 	jmp loopEnd
 
