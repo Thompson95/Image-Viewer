@@ -63,7 +63,6 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             {
                 filter = fe.Filter;
                 FilterName = filter.ToString();
-                Debug.WriteLine(filter.ToString());
                 FilterValue = filterValues[filter].ToString();
             PresenterID = fe.PresenterID;
             });

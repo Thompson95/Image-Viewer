@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageViewer.Methods;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -18,10 +19,8 @@ namespace ImageViewer.Model
         public static BitmapSource Negative(BitmapSource source)
         {
             AsmProxy proxy = new AsmProxy();
-            int stride = (int)(source.PixelWidth * 4);
-            int size = (int)(source.PixelHeight * stride);
-            byte[] pixels = new byte[size];
-            source.CopyPixels(pixels, stride, 0);
+            int size, stride;
+            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
             unsafe
             {
                 fixed(byte* array = pixels)
@@ -40,7 +39,19 @@ namespace ImageViewer.Model
         }
         public static BitmapSource Brightness(BitmapSource source, Byte value)
         {
-            return source;
+            AsmProxy proxy = new AsmProxy();
+            int size, stride;
+            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
+            unsafe
+            {
+                fixed (byte* array = pixels)
+                {
+                    proxy.executeAsmBrightnessFilter(array, size, value);
+                }
+
+            }
+            BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
+            return result;
         }
         public static BitmapSource GreyScale(BitmapSource source)
         {

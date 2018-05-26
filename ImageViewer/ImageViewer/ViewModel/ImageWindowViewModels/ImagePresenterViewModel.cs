@@ -529,35 +529,35 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 case Filter.Filters.Brightness:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Brightness(temp.Bitmap, fe.Value);
+                        temp.Bitmap = Filter.Brightness(temp.OriginalBitmap, fe.Value);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.Contrast:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Contrast(temp.Bitmap, fe.Value);
+                        temp.Bitmap = Filter.Contrast(temp.OriginalBitmap, fe.Value);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.Sepia:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Sepia(temp.Bitmap, fe.Value);
+                        temp.Bitmap = Filter.Sepia(temp.OriginalBitmap, fe.Value);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.Negative:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Negative(temp.Bitmap);
+                        temp.Bitmap = Filter.Negative(temp.OriginalBitmap);
                         DisplayedImage = temp;
                     }
                     break;
                 case Filter.Filters.GreyScale:
                     {
                         Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.GreyScale(temp.Bitmap);
+                        temp.Bitmap = Filter.GreyScale(temp.OriginalBitmap);
                         DisplayedImage = temp;
                     }
                     break;
@@ -579,14 +579,21 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 {
                     FilterControlWindow.Instance.Visibility = Visibility.Visible;
                 }
-            }
-
-            if (IsSynchronized)
-            {
-                _aggregator.GetEvent<SendFilterValueEvent>().Publish(fe);
+                if (IsSynchronized)
+                {
+                    _aggregator.GetEvent<FilterEvent>().Publish(fe);
+                }
             }
             else
-                ApplyFilter(fe);
+            {
+                if (IsSynchronized)
+                {
+
+                    _aggregator.GetEvent<SendFilterValueEvent>().Publish(fe);
+                }
+                else
+                    ApplyFilter(fe);
+            }
         }
         private void ResetZoom(Object arg)
         {
