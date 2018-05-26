@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageViewer", "ImageViewer\ImageViewer.csproj", "{E4009325-2352-405F-AECE-06033BDC8F1F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BB97EAFE-AA5C-4E01-8C30-E2D74D77F330} = {BB97EAFE-AA5C-4E01-8C30-E2D74D77F330}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{485DAE21-0774-47CD-B233-3F47C98CBAA7}"
 EndProject

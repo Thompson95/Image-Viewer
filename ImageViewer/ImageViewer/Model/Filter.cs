@@ -22,11 +22,13 @@ namespace ImageViewer.Model
             int size = (int)(source.PixelHeight * stride);
             byte[] pixels = new byte[size];
             source.CopyPixels(pixels, stride, 0);
-            Debug.WriteLine(proxy.executeAsmNegativeFilter());
-            for (int i = 0; i < size; i++)
+            unsafe
             {
-                if (i % 4 != 3)
-                    pixels[i] =  (byte)(255 -pixels[i]);
+                fixed(byte* array = pixels)
+                {
+                    proxy.executeAsmNegativeFilter(array, size);
+                }
+                
             }
             BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return result;

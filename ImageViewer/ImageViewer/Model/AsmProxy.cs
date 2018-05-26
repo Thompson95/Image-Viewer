@@ -10,11 +10,11 @@ namespace ImageViewer.Model
     public unsafe class AsmProxy
     {
         [DllImport("Asm.dll")]
-        private static extern byte asmNegativeFilter();
+        private static extern void asmNegativeFilter(byte* bitmap, int length);
 
-        public byte executeAsmNegativeFilter()
+        public void executeAsmNegativeFilter(byte* bitmap, int length)
         {
-            return asmNegativeFilter();
+            asmNegativeFilter(bitmap, length);
         }
     }
 }
