@@ -1,27 +1,26 @@
-.data
 .code
 asmNegativeFilter proc
 	mov r10, 0
-	mov r9, rdx
+	mov r11, rbx
+	mov rbx, 4
 	jmp loopEnd
 
-loopStart:
+	loopStart :
+	mov rdx, 0
 	mov rax, r10
-	mov rbx, 4
-	div ebx
-	cmp dx, 3
-	jbe notAlpha
-	inc r10
-	jmp loopStart
-	
-notAlpha:
+	div rbx
+	cmp rdx, 3
+	je Alpha
+
 	mov rax, 255
-	sub al, byte ptr[rcx + r10]
-	mov byte ptr[rcx + r10], al
+	sub al, byte ptr[r8 + r10]
+	mov byte ptr[r8 + r10], al
+alpha:
 	inc r10
-loopEnd:
-	cmp r10, r9 
+loopEnd :
+	cmp r10, r9
 	jl loopStart
+	mov rbx, r11
 
 	ret
 asmNegativeFilter endp
