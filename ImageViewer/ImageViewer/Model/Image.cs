@@ -27,12 +27,14 @@ namespace ImageViewer.Model
                 {
                     OriginalBitmap = new BitmapImage(new Uri(_filePath));
                     Bitmap = OriginalBitmap.Clone();
+                    FilteredBitmap = OriginalBitmap.Clone();
                 }
             }
         }
         public string Extension { get ; set; }
         public BitmapSource Bitmap { get; set; }
         public BitmapSource OriginalBitmap { get; set; }
+        public BitmapSource FilteredBitmap { get; set; }
         public Thickness Position { get; set; }
         public Rotation Rotation { get; set; }
 

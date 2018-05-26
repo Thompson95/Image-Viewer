@@ -410,5 +410,14 @@ namespace ImageViewer.Methods
                 return null;
             }
         }
+
+        public byte[] GetByteArray(BitmapSource source, out int size, out int stride)
+        {
+            stride = (int)(source.PixelWidth * 4);
+            size = (int)(source.PixelHeight * stride);
+            byte[] pixels = new byte[size];
+            source.CopyPixels(pixels, stride, 0);
+            return pixels;
+        }
     }
 }

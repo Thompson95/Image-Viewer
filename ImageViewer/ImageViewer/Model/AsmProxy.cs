@@ -16,5 +16,13 @@ namespace ImageViewer.Model
         {
             asmNegativeFilter(bitmap, length);
         }
+
+        [DllImport("Asm.dll")]
+        private static extern void asmBrightnessFilter(byte* bitmap, int length, byte value);
+
+        public void executeAsmBrightnessFilter(byte* bitmap, int length, byte value)
+        {
+            asmBrightnessFilter(bitmap, length, value);
+        }
     }
 }
