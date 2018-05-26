@@ -70,6 +70,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.dll</TargetExt>
     <OutDir>$(SolutionDir)\ImageViewer\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\ImageViewer\bin\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.dll</TargetExt>
@@ -104,6 +105,7 @@
       <SubSystem>Windows</SubSystem>
       <NoEntryPoint>true</NoEntryPoint>
     </Link>
+    <MASM />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
