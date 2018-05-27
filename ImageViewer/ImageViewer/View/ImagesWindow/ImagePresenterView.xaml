@@ -168,7 +168,7 @@
             <ContextMenu>
                 <MenuItem Header="Reset position" Command="{Binding ResetPositionCommand}" CommandParameter="{Binding}"/>
                 <MenuItem Header="Reset zoom" Command="{Binding ResetZoomCommand}" CommandParameter="{Binding}"/>
-                <MenuItem Header="Filters">
+                <MenuItem Header="Add filters...">
                         <MenuItem Header="Contrast" Command="{Binding Filter_ContrastCommand}" CommandParameter="{x:Static model:Filter+Filters.Contrast}"/>
                     <MenuItem Header="Brightness" Command="{Binding Filter_BrightnessCommand}" CommandParameter="{x:Static model:Filter+Filters.Brightness}"/>
                     <MenuItem Header="Gray Scale" Command="{Binding Filter_GrayScaleCommand}" CommandParameter="{x:Static model:Filter+Filters.GrayScale}"/>

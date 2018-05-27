@@ -23,13 +23,13 @@ namespace ImageViewer.View.ImagesWindow
     /// <summary>
     /// Interaction logic for DisplayImageWindow.xaml
     /// </summary>
-    public partial class FilterControlWindow : MetroWindow, IDisposable
+    public partial class FilterControlListWindow : MetroWindow, IDisposable
     {
 
-        private static FilterControlWindow _instance;
+        private static FilterControlListWindow _instance;
         protected IEventAggregator _aggregator = GlobalEvent.GetEventAggregator();
 
-        private FilterControlWindow()
+        private FilterControlListWindow()
         {
             InitializeComponent();
             _aggregator.GetEvent<DisposeEvent>().Subscribe(Dispose);
@@ -55,13 +55,13 @@ namespace ImageViewer.View.ImagesWindow
             }
         }
 
-        public static FilterControlWindow Instance
+        public static FilterControlListWindow Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new FilterControlWindow();
+                    _instance = new FilterControlListWindow();
                 }
                 return _instance;
             }

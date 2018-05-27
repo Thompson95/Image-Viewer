@@ -151,9 +151,11 @@
     <Compile Include="Model\Event\GridStatusEvent.cs" />
     <Compile Include="Model\Event\LoadRegionEvent.cs" />
     <Compile Include="Model\Event\NextPreviousImageEvent.cs" />
+    <Compile Include="Model\Event\RemoveFilterEvent.cs" />
     <Compile Include="Model\Event\ResetRegionsEvent.cs" />
     <Compile Include="Model\Event\RotateImageEvent.cs" />
     <Compile Include="Model\Event\SendDisplayedImage.cs" />
+    <Compile Include="Model\Event\SendFilterListEvent.cs" />
     <Compile Include="Model\Event\SendFilterValueEvent.cs" />
     <Compile Include="Model\Event\SendPixelInformationEvent.cs" />
     <Compile Include="Methods\MouseManagement.cs" />
@@ -196,6 +198,7 @@
     <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="ViewModel\FileExplorerViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\DisplayImageWindowViewModel.cs" />
+    <Compile Include="ViewModel\ImageWindowViewModels\FilterControlListViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\FilterControlViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\ImageExplorerViewModel.cs" />
     <Compile Include="ViewModel\ImageWindowViewModels\ImagePresenterViewModel.cs" />
@@ -214,8 +217,11 @@
     <Compile Include="View\ImagesWindow\DisplayImageWindow.xaml.cs">
       <DependentUpon>DisplayImageWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\ImagesWindow\FilterControlWindow.xaml.cs">
-      <DependentUpon>FilterControlWindow.xaml</DependentUpon>
+    <Compile Include="View\ImagesWindow\FilterControlView.xaml.cs">
+      <DependentUpon>FilterControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ImagesWindow\FilterControlListWindow.xaml.cs">
+      <DependentUpon>FilterControlListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\ImagesWindow\ImageExplorerView.xaml.cs">
       <DependentUpon>ImageExplorerView.xaml</DependentUpon>
@@ -264,7 +270,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\ImagesWindow\FilterControlWindow.xaml">
+    <Page Include="View\ImagesWindow\FilterControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ImagesWindow\FilterControlListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
