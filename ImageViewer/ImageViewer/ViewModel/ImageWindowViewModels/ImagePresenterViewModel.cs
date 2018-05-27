@@ -57,7 +57,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
         public RelayCommand ResetZoomCommand { get; set; }
         public RelayCommand Filter_ContrastCommand { get; set; }
         public RelayCommand Filter_BrightnessCommand { get; set; }
-        public RelayCommand Filter_GreyScaleCommand { get; set; }
+        public RelayCommand Filter_GrayScaleCommand { get; set; }
         public RelayCommand Filter_SepiaCommand { get; set; }
         public RelayCommand Filter_NegativeCommand { get; set; }
         public RelayCommand Filter_ResetCommand { get; set; }
@@ -115,11 +115,11 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 return ViewModelID;
             }
         }
-        public int IncrementedIndex
+        public String IncrementedIndex
         {
             get
             {
-                return ImageIndex + 1;
+                return $"{ImageIndex + 1}/{ImageList.Count}";
             }
         }
         public int ImageIndex
@@ -192,8 +192,8 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                     }
                     if (!_subscriptionTokens.ContainsKey(typeof(FilterEvent)))
                     {
-                        token = _aggregator.GetEvent<SendFilterValueEvent>().Subscribe(ApplyFilter);
-                        _subscriptionTokens.Add(typeof(SendFilterValueEvent), token);
+                        //token = _aggregator.GetEvent<SendFilterValueEvent>().Subscribe(ApplyFilter);
+                        //_subscriptionTokens.Add(typeof(SendFilterValueEvent), token);
                     }
                 }
                 else
@@ -208,8 +208,8 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                     _subscriptionTokens.Remove(typeof(ZoomEvent));
                     _aggregator.GetEvent<SynchronizeRotationEvent>().Unsubscribe(_subscriptionTokens[typeof(SynchronizeRotationEvent)]);
                     _subscriptionTokens.Remove(typeof(SynchronizeRotationEvent));
-                    _aggregator.GetEvent<SendFilterValueEvent>().Unsubscribe(_subscriptionTokens[typeof(SendFilterValueEvent)]);
-                    _subscriptionTokens.Remove(typeof(SendFilterValueEvent));
+                    //_aggregator.GetEvent<SendFilterValueEvent>().Unsubscribe(_subscriptionTokens[typeof(SendFilterValueEvent)]);
+                    //_subscriptionTokens.Remove(typeof(SendFilterValueEvent));
                 }
                 NotifyPropertyChanged();
             }
@@ -488,6 +488,20 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                RegionLocation = new Thickness(0, 0, 0, 0);
            });
             _subscriptionTokens.Add(typeof(ResetRegionsEvent), token);
+            token = _aggregator.GetEvent<SendFilterValueEvent>().Subscribe(ApplyFilter);
+            _subscriptionTokens.Add(typeof(SendFilterValueEvent), token);
+            token = _aggregator.GetEvent<RemoveFilterEvent>().Subscribe(filter =>
+            {
+                DisplayedImage.FilterValues.Remove(filter);
+                DisplayedImage = DisplayedImage.RefreshImageFilters();
+                if(filter.PresenterID == PresenterID)
+                {
+                    SendFilterListEvent sfl = new SendFilterListEvent();
+                    sfl.FilterList = DisplayedImage.FilterValues;
+                    _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
+                }
+            });
+            _subscriptionTokens.Add(typeof(RemoveFilterEvent), token);
 
             ImageClickCommand = new GalaSoft.MvvmLight.Command.RelayCommand<RoutedEventArgs>(ImageClickExecute);
             LeftArrowCommand = new RelayCommand(PreviousImage);
@@ -504,7 +518,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             MouseWheelCommand = new GalaSoft.MvvmLight.Command.RelayCommand<MouseWheelEventArgs>(MouseWheel);
             Filter_BrightnessCommand = new RelayCommand(FilterChoose);
             Filter_ContrastCommand = new RelayCommand(FilterChoose);
-            Filter_GreyScaleCommand= new RelayCommand(FilterChoose);
+            Filter_GrayScaleCommand= new RelayCommand(FilterChoose);
             Filter_NegativeCommand= new RelayCommand(FilterChoose);
             Filter_SepiaCommand = new RelayCommand(FilterChoose);
             Filter_ResetCommand = new RelayCommand(FilterChoose);
@@ -516,53 +530,44 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
         {
             if (!IsSynchronized && fe.PresenterID != PresenterID)
                 return;
-            switch (fe.Filter)
-            {
-                case Filter.Filters.None:
-                    {
-                        Image temp = DisplayedImage;
-                        temp.Bitmap = new Rotate().SingleBitmapRotation((int)temp.Rotation * 90, temp.OriginalBitmap);
-                        DisplayedImage = temp;
 
-                    }
-                    break;
-                case Filter.Filters.Brightness:
-                    {
-                        Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Brightness(temp.OriginalBitmap, fe.Value);
-                        DisplayedImage = temp;
-                    }
-                    break;
-                case Filter.Filters.Contrast:
-                    {
-                        Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Contrast(temp.OriginalBitmap, fe.Value);
-                        DisplayedImage = temp;
-                    }
-                    break;
-                case Filter.Filters.Sepia:
-                    {
-                        Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Sepia(temp.OriginalBitmap, fe.Value);
-                        DisplayedImage = temp;
-                    }
-                    break;
-                case Filter.Filters.Negative:
-                    {
-                        Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.Negative(temp.OriginalBitmap);
-                        DisplayedImage = temp;
-                    }
-                    break;
-                case Filter.Filters.GreyScale:
-                    {
-                        Image temp = DisplayedImage;
-                        temp.Bitmap = Filter.GreyScale(temp.OriginalBitmap);
-                        DisplayedImage = temp;
-                    }
-                    break;
-                default:
-                    break;
+            Image temp = DisplayedImage;
+
+            if (fe.Filter == Filter.Filters.None)
+            {
+                temp.Bitmap = new Rotate().SingleBitmapRotation((int)temp.Rotation * 90, temp.OriginalBitmap);
+                temp.FilterValues.Clear();
+                DisplayedImage = temp;
+                if (PresenterID == fe.PresenterID)
+                {
+                    SendFilterListEvent sfl = new SendFilterListEvent();
+                    sfl.FilterList = DisplayedImage.FilterValues;
+                    _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
+                }
+                return;
+            }
+
+            if (temp.FilterValues.Where(x => x.Filter == fe.Filter).Count() == 0)
+            {
+                DisplayedImage.FilterValues.Add(new FilterControlViewModel() { Filter = fe.Filter, Value = fe.Value, PresenterID = this.PresenterID});
+            }
+            else if(fe.FilterControlVM != null)
+            {
+                fe.FilterControlVM.Value = fe.Value;
+                fe.FilterControlVM.Filter = fe.Filter;
+                fe.FilterControlVM.PresenterID = PresenterID;
+            }
+            else
+            {
+                DisplayedImage.FilterValues.Add(new FilterControlViewModel() { Filter = fe.Filter, Value = fe.Value, PresenterID = this.PresenterID });
+            }
+
+            DisplayedImage = DisplayedImage.RefreshImageFilters();
+            if (PresenterID == fe.PresenterID)
+            {
+                SendFilterListEvent sfl = new SendFilterListEvent();
+                sfl.FilterList = DisplayedImage.FilterValues;
+                _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
             }
         }
 
@@ -572,27 +577,20 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             FilterEvent fe = new FilterEvent();
             fe.Filter = (Filter.Filters)filter;
             fe.PresenterID = this.PresenterID;
-            fe.Value = 0;
-            if(fe.Filter != Filter.Filters.Negative && fe.Filter != Filter.Filters.None && fe.Filter != Filter.Filters.GreyScale)
+            fe.Value = 127;
+            fe.FilterControlVM = null;
+            if(fe.Filter != Filter.Filters.Negative && fe.Filter != Filter.Filters.None && fe.Filter != Filter.Filters.GrayScale)
             {
-                if (FilterControlWindow.Instance.Visibility == Visibility.Collapsed)
-                {
-                    FilterControlWindow.Instance.Visibility = Visibility.Visible;
-                }
-                if (IsSynchronized)
-                {
-                    _aggregator.GetEvent<FilterEvent>().Publish(fe);
-                }
+                fe.Value = 0;
             }
-            else
-            {
-                if (IsSynchronized)
-                {
 
-                    _aggregator.GetEvent<SendFilterValueEvent>().Publish(fe);
-                }
-                else
-                    ApplyFilter(fe);
+            if (FilterControlListWindow.Instance.Visibility == Visibility.Collapsed)
+            {
+                FilterControlListWindow.Instance.Visibility = Visibility.Visible;
+            }
+            if (IsSynchronized)
+            {
+                _aggregator.GetEvent<SendFilterValueEvent>().Publish(fe);
             }
         }
         private void ResetZoom(Object arg)

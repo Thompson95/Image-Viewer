@@ -13,7 +13,7 @@ namespace ImageViewer.Model
     {
        public enum Filters
         {
-            None, Brightness, Contrast, Sepia, Negative, GreyScale
+            None, Brightness, Contrast, Sepia, Negative, GrayScale
         } 
 
         public static BitmapSource Negative(BitmapSource source)
@@ -27,7 +27,6 @@ namespace ImageViewer.Model
                 {
                     proxy.executeAsmNegativeFilter(array, size);
                 }
-                
             }
             BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return result;
@@ -53,7 +52,7 @@ namespace ImageViewer.Model
             BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return result;
         }
-        public static BitmapSource GreyScale(BitmapSource source)
+        public static BitmapSource GrayScale(BitmapSource source)
         {
             return source;
         }
