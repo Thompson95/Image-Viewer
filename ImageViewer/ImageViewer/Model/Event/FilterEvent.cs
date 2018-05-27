@@ -9,5 +9,6 @@ namespace ImageViewer.Model.Event
     {
         public int PresenterID { get; set; }
         public Filter.Filters Filter { get; set; }
+        public byte Value { get; set; }
     }
 }

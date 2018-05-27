@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ImageViewer.Methods;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,32 +18,46 @@ namespace ImageViewer.Model
 
         public static BitmapSource Negative(BitmapSource source)
         {
-            int stride = (int)(source.PixelWidth * 4);
-            int size = (int)(source.PixelHeight * stride);
-            byte[] pixels = new byte[size];
-            source.CopyPixels(pixels, stride, 0);
-            for (int i = 0; i < size; i++)
+            AsmProxy proxy = new AsmProxy();
+            int size, stride;
+            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
+            unsafe
             {
-                if (i % 4 != 3)
-                    pixels[i] =  (byte)(255 -pixels[i]);
+                fixed(byte* array = pixels)
+                {
+                    proxy.executeAsmNegativeFilter(array, size);
+                }
+                
             }
             BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return result;
         }
 
-        public static BitmapSource Sepia(BitmapSource source)
+        public static BitmapSource Sepia(BitmapSource source, Byte value)
         {
             return source;
         }
-        public static BitmapSource Brightness(BitmapSource source)
+        public static BitmapSource Brightness(BitmapSource source, Byte value)
         {
-            return source;
+            AsmProxy proxy = new AsmProxy();
+            int size, stride;
+            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
+            unsafe
+            {
+                fixed (byte* array = pixels)
+                {
+                    proxy.executeAsmBrightnessFilter(array, size, value);
+                }
+
+            }
+            BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
+            return result;
         }
         public static BitmapSource GreyScale(BitmapSource source)
         {
             return source;
         }
-        public static BitmapSource Contrast(BitmapSource source)
+        public static BitmapSource Contrast(BitmapSource source, Byte value)
         {
             return source;
         }
