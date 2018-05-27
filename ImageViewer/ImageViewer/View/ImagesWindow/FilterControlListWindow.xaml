@@ -10,7 +10,7 @@
         xmlns:converter="clr-namespace:ImageViewer.Converters"
         xmlns:Command="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
         mc:Ignorable="d"
-        Title="Filter Window" Width="300" Height="Auto"
+        Title="{Binding PresenterID}" Width="300" Height="Auto"
         ResizeMode="CanMinimize"
         ShowCloseButton="False"
         ShowMaxRestoreButton="False"

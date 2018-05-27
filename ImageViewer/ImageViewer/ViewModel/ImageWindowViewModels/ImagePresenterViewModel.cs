@@ -69,6 +69,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
 
 
         #endregion
+
         #region Properties
         public Image DisplayedImage
         {
@@ -496,9 +497,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 DisplayedImage = DisplayedImage.RefreshImageFilters();
                 if(filter.PresenterID == PresenterID)
                 {
-                    SendFilterListEvent sfl = new SendFilterListEvent();
-                    sfl.FilterList = DisplayedImage.FilterValues;
-                    _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
+                    SendFilterList();
                 }
             });
             _subscriptionTokens.Add(typeof(RemoveFilterEvent), token);
@@ -526,9 +525,16 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
 
 
         #region Private methods
+        private void SendFilterList()
+        {
+            SendFilterListEvent sfl = new SendFilterListEvent();
+            sfl.FilterList = DisplayedImage.FilterValues;
+            sfl.PresenterID = PresenterID;
+            _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
+        }
         private void ApplyFilter(FilterEvent fe)
         {
-            if (!IsSynchronized && fe.PresenterID != PresenterID)
+            if (PresenterID != fe.PresenterID)
                 return;
 
             Image temp = DisplayedImage;
@@ -540,9 +546,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 DisplayedImage = temp;
                 if (PresenterID == fe.PresenterID)
                 {
-                    SendFilterListEvent sfl = new SendFilterListEvent();
-                    sfl.FilterList = DisplayedImage.FilterValues;
-                    _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
+                    SendFilterList();
                 }
                 return;
             }
@@ -565,13 +569,65 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             DisplayedImage = DisplayedImage.RefreshImageFilters();
             if (PresenterID == fe.PresenterID)
             {
-                SendFilterListEvent sfl = new SendFilterListEvent();
-                sfl.FilterList = DisplayedImage.FilterValues;
-                _aggregator.GetEvent<SendFilterListEvent>().Publish(sfl);
+                SendFilterList();
             }
         }
+        private void SerializeOutputFromPresenters(string path)
+        {
+            OutputSerializer os = new OutputSerializer();
+            os.SaveByRegion(DisplayedImage, ViewModelID, RegionWidth, RegionHeight, RegionLocation, path, Scale);
+        }
+        private void SaveRegion(String name)
+        {
+            if (!_isSaving)
+                return;
 
-#region Commands
+            Point point = new Point(RegionLocation.Left * ImageSource.DpiY / 96.0, RegionLocation.Top * ImageSource.DpiY / 96.0);
+            Region region = new Region(point, new Size(_regionWidth * ImageSource.DpiY / 96.0, _regionHeight * ImageSource.DpiY / 96.0), name, new Vector(ImageSource.DpiX, ImageSource.DpiY), _imageList, _displayedImage, ViewModelID, ImageIndex, Scale);
+            _aggregator.GetEvent<SendRegionEvent>().Publish(region);
+            _isSaving = false;
+        }
+        private void CalculateRegionProperties()
+        {
+            if (DisplayedImage == null)
+                return;
+            Dictionary<String, Object> parameters = new Dictionary<string, object>();
+            parameters.Add("RegionLocation", new Point(RegionLocation.Left, RegionLocation.Top));
+            parameters.Add("RegionWidth", RegionWidth);
+            parameters.Add("RegionHeight", RegionHeight);
+            parameters.Add("BitmapSource", ImageSource);
+            parameters.Add("ImagePosition", ImagePosition);
+            parameters.Add("PresenterID", ViewModelID);
+            parameters.Add("Scale", Scale);
+            ITool tool = new CreateRegion();
+            tool.AffectImage(parameters);
+        }
+
+        public void Dispose()
+        {
+            IsSynchronized = false;
+            _aggregator.GetEvent<SerializeOutputEvent>().Unsubscribe(_subscriptionTokens[typeof(SerializeOutputEvent)]);
+            _subscriptionTokens.Remove(typeof(SerializeOutputEvent));
+            _aggregator.GetEvent<RotateImageEvent>().Unsubscribe(_subscriptionTokens[typeof(RotateImageEvent)]);
+            _subscriptionTokens.Remove(typeof(RotateImageEvent));
+            _aggregator.GetEvent<SynchronizationEvent>().Unsubscribe(_subscriptionTokens[typeof(SynchronizationEvent)]);
+            _subscriptionTokens.Remove(typeof(SynchronizationEvent));
+            _aggregator.GetEvent<SendDisplayedImage>().Unsubscribe(_subscriptionTokens[typeof(SendDisplayedImage)]);
+            _subscriptionTokens.Remove(typeof(SendDisplayedImage));
+            _aggregator.GetEvent<SendToolEvent>().Unsubscribe(_subscriptionTokens[typeof(SendToolEvent)]);
+            _subscriptionTokens.Remove(typeof(SendToolEvent));
+            _aggregator.GetEvent<SendRegionNameEvent>().Unsubscribe(_subscriptionTokens[typeof(SendRegionNameEvent)]);
+            _subscriptionTokens.Remove(typeof(SendRegionNameEvent));
+            _aggregator.GetEvent<LoadRegionEvent>().Unsubscribe(_subscriptionTokens[typeof(LoadRegionEvent)]);
+            _subscriptionTokens.Remove(typeof(LoadRegionEvent));
+            _aggregator.GetEvent<SendImageList>().Unsubscribe(_subscriptionTokens[typeof(SendImageList)]);
+            _subscriptionTokens.Remove(typeof(SendImageList));
+            _aggregator.GetEvent<ResetRegionsEvent>().Unsubscribe(_subscriptionTokens[typeof(ResetRegionsEvent)]);
+            _subscriptionTokens.Remove(typeof(ResetRegionsEvent));
+        }
+        #endregion
+
+        #region Commands
         private void FilterChoose(Object filter)
         {
             FilterEvent fe = new FilterEvent();
@@ -779,23 +835,6 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
                 }
             }
         }
-        #endregion
-        private void SerializeOutputFromPresenters(string path)
-        {
-            OutputSerializer os = new OutputSerializer();
-            os.SaveByRegion(DisplayedImage, ViewModelID, RegionWidth, RegionHeight, RegionLocation, path, Scale);
-        }
-
-        private void SaveRegion(String name)
-        {
-            if (!_isSaving)
-                return;
-
-            Point point = new Point(RegionLocation.Left * ImageSource.DpiY / 96.0, RegionLocation.Top * ImageSource.DpiY / 96.0);
-            Region region = new Region(point, new Size(_regionWidth * ImageSource.DpiY / 96.0, _regionHeight * ImageSource.DpiY / 96.0), name, new Vector(ImageSource.DpiX, ImageSource.DpiY), _imageList, _displayedImage, ViewModelID, ImageIndex, Scale);
-            _aggregator.GetEvent<SendRegionEvent>().Publish(region);
-            _isSaving = false;
-        }
 
         private void MouseLeftClick(System.Windows.RoutedEventArgs args)
         {
@@ -915,6 +954,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
         {
             if (DisplayedImage == null)
                 return;
+            SendFilterList();
             if (!_escapeClicked)
             {
                 if (_tool != null)
@@ -1008,48 +1048,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             }
             _isDragged = false;
         }
-        private void CalculateRegionProperties()
-        {
-            if (DisplayedImage == null)
-                return;
-            Dictionary<String, Object> parameters = new Dictionary<string, object>();
-            parameters.Add("RegionLocation", new Point(RegionLocation.Left, RegionLocation.Top));
-            parameters.Add("RegionWidth", RegionWidth);
-            parameters.Add("RegionHeight", RegionHeight);
-            parameters.Add("BitmapSource", ImageSource);
-            parameters.Add("ImagePosition", ImagePosition);
-            parameters.Add("PresenterID", ViewModelID);
-            parameters.Add("Scale", Scale);
-            ITool tool = new CreateRegion();
-            tool.AffectImage(parameters);
-        }
-
-        public void Dispose()
-        {
-            IsSynchronized = false;
-            _aggregator.GetEvent<SerializeOutputEvent>().Unsubscribe(_subscriptionTokens[typeof(SerializeOutputEvent)]);
-            _subscriptionTokens.Remove(typeof(SerializeOutputEvent));
-            _aggregator.GetEvent<RotateImageEvent>().Unsubscribe(_subscriptionTokens[typeof(RotateImageEvent)]);
-            _subscriptionTokens.Remove(typeof(RotateImageEvent));
-            _aggregator.GetEvent<SynchronizationEvent>().Unsubscribe(_subscriptionTokens[typeof(SynchronizationEvent)]);
-            _subscriptionTokens.Remove(typeof(SynchronizationEvent));
-            _aggregator.GetEvent<SendDisplayedImage>().Unsubscribe(_subscriptionTokens[typeof(SendDisplayedImage)]);
-            _subscriptionTokens.Remove(typeof(SendDisplayedImage));
-            _aggregator.GetEvent<SendToolEvent>().Unsubscribe(_subscriptionTokens[typeof(SendToolEvent)]);
-            _subscriptionTokens.Remove(typeof(SendToolEvent));
-            _aggregator.GetEvent<SendRegionNameEvent>().Unsubscribe(_subscriptionTokens[typeof(SendRegionNameEvent)]);
-            _subscriptionTokens.Remove(typeof(SendRegionNameEvent));
-            _aggregator.GetEvent<LoadRegionEvent>().Unsubscribe(_subscriptionTokens[typeof(LoadRegionEvent)]);
-            _subscriptionTokens.Remove(typeof(LoadRegionEvent));
-            _aggregator.GetEvent<SendImageList>().Unsubscribe(_subscriptionTokens[typeof(SendImageList)]);
-            _subscriptionTokens.Remove(typeof(SendImageList));
-            _aggregator.GetEvent<ResetRegionsEvent>().Unsubscribe(_subscriptionTokens[typeof(ResetRegionsEvent)]);
-            _subscriptionTokens.Remove(typeof(ResetRegionsEvent));
-
-        }
         #endregion
-
-
     }
 }
 
