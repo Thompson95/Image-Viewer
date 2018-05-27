@@ -19,20 +19,8 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
 {
     public class FilterControlListViewModel : BaseViewModel, IDisposable
     {
-        private static FilterControlListViewModel _instance;
-        public static FilterControlListViewModel Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new FilterControlListViewModel();
-                }
-                return _instance;
-            }
-        }
         private ObservableCollection<FilterControlViewModel> _filterList;
-
+        private int _presenterID;
         public ObservableCollection<FilterControlViewModel> FilterList
         {
             get
@@ -41,18 +29,29 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             }
             set
             {
-                //_filterList.Clear();
                 _filterList = value;
                 NotifyPropertyChanged();
             }
         }
-        public int PresenterID { get; set; }
+        public String PresenterID
+        {
+            get
+            {
+                return $"Filter Control ({_presenterID})";
+            }
+            set
+            {
+                _presenterID = int.Parse(value);
+                NotifyPropertyChanged();
+            }
+        }
         public FilterControlListViewModel()
         {
             FilterList = new ObservableCollection<FilterControlViewModel>();
             _aggregator.GetEvent<SendFilterListEvent>().Subscribe(sfl =>
            {
                FilterList = sfl.FilterList;
+               PresenterID = sfl.PresenterID.ToString();
            });
         }
 

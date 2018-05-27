@@ -77,7 +77,7 @@ namespace ImageViewer.Model
                 encoder.Frames.Add(BitmapFrame.Create(Bitmap));
                 encoder.Save(fileStream);
             }
-            _bitmap = _originalBitmap.Clone();
+            _bitmap = new Rotate().SingleBitmapRotation((int)this.Rotation * 90, this.OriginalBitmap);
             for (int i = 0; i < FilterValues.Count; i++)
             {
                 var item = FilterValues[i];

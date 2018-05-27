@@ -11,6 +11,7 @@ namespace ImageViewer.Model.Event
 {
     class SendFilterListEvent : PubSubEvent<SendFilterListEvent>
     {
-        public ObservableCollection<FilterControlViewModel> FilterList;
+        public ObservableCollection<FilterControlViewModel> FilterList { get; set; }
+        public int PresenterID { get; set; }
     }
 }
