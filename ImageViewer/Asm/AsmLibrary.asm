@@ -15,6 +15,7 @@ loopStart :
 	vmovaps xmm1, xmmword ptr[alphaMask]
 	vmovaps xmm0, xmmword ptr[array255]
 	vpsubb xmm3, xmm0, xmm2
+	vpand xmm3, xmm3, xmmword ptr [alphaMask]
 	vpand xmm2, xmm2, xmmword ptr [negAlphaMask]
 	vpaddb xmm3, xmm3, xmm2
 	vmovupd xmmword ptr [rcx + r10], xmm3
