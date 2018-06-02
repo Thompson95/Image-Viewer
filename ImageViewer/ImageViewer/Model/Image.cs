@@ -71,12 +71,12 @@ namespace ImageViewer.Model
 
         public Image RefreshImageFilters()
         {
-            using (var fileStream = new FileStream("C:\\Users\\taras\\Desktop\\filtered bitmaps\\bitmap.png", FileMode.Create))
-            {
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(Bitmap));
-                encoder.Save(fileStream);
-            }
+            //using (var fileStream = new FileStream("C:\\Users\\taras\\Desktop\\filtered bitmaps\\bitmap.png", FileMode.Create))
+            //{
+            //    BitmapEncoder encoder = new PngBitmapEncoder();
+            //    encoder.Frames.Add(BitmapFrame.Create(Bitmap));
+            //    encoder.Save(fileStream);
+            //}
             _bitmap = new Rotate().SingleBitmapRotation((int)this.Rotation * 90, this.OriginalBitmap);
             for (int i = 0; i < FilterValues.Count; i++)
             {

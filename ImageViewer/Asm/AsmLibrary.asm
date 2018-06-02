@@ -58,4 +58,5 @@ loopEnd :
 
 	ret
 asmBrightnessFilter endp
+
 end
