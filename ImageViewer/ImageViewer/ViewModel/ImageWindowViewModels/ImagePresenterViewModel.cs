@@ -635,7 +635,7 @@ namespace ImageViewer.ViewModel.ImageWindowViewModels
             fe.PresenterID = this.PresenterID;
             fe.Value = 127;
             fe.FilterControlVM = null;
-            if(fe.Filter != Filter.Filters.Negative && fe.Filter != Filter.Filters.None && fe.Filter != Filter.Filters.GrayScale)
+            if( fe.Filter == Filter.Filters.Brightness)
             {
                 fe.Value = 0;
             }

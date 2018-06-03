@@ -95,7 +95,10 @@ namespace ImageViewer.Model
                         break;
                     case Filter.Filters.Sepia:
                         {
-                            Bitmap = Filter.Sepia(_bitmap, item.Value);
+                            if (item.Value > 128)
+                                Bitmap = Filter.Sepia(_bitmap);
+                            else
+                                Bitmap = _bitmap;
                         }
                         break;
                     case Filter.Filters.Negative:
