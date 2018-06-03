@@ -5,6 +5,8 @@ array255 byte 16 dup(0FFh)
 treshold qword 010h
 middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
+highval DWORD 8 dup(255.0)
+lowval DWORD 8 dup(0.0)
 .code
 asmNegativeFilter proc
 	mov r10, 0
@@ -66,19 +68,26 @@ asmBrightnessFilter endp
 
 asmContrastFilter proc
 	mov r9, rcx
-	mov r10, 0
 	mov r11, rcx
 	add r11, rbx
 mainloop :
 	vmovupd ymm0, [r9] ;load chunk of data
 	vmovupd ymm1, [rdx] ;load coefficient
-	vmovaps ymm2, middle ;load middle value for calculation
-	vmovaps ymm3, masktable ;load masked table
+	vmovups ymm2, middle ;load middle value for calculation
+	vmovups ymm3, masktable ;load masked table
+	vmovups ymm4, highval ;load upper bound
+	vmovups ymm5, lowval ;load lower bound
 	VSUBPS  ymm0, ymm0, ymm2
 	VMULPS ymm0, ymm0, ymm1
 	VADDPS ymm0, ymm0, ymm2
-	VROUNDPS ymm0, ymm0, 1
+	VROUNDPS ymm0, ymm0, 2
 	vmaskmovps [r9], ymm3, ymm0
+	VCMPNLEPS ymm6, ymm0, highval
+	VANDPS  ymm6, ymm6, ymm3
+	vmaskmovps [r9], ymm6, ymm4
+	VCMPLEPS ymm6, ymm0, lowval
+	VANDPS  ymm6, ymm6, ymm3
+	vmaskmovps [r9], ymm6, ymm5
 	add r9, 32
 	cmp r9, r11
 	jl mainloop
