@@ -61,7 +61,8 @@ namespace ImageViewer.Model
             AsmProxy proxy = new AsmProxy();
             int size, stride;
             int c = value - 128;
-            float factor = 259 * (c + 255) / (255 * (259 - c));
+            float factor = (float)(259 * (c + 255)) / (float)(255 * (259 - c));
+            Debug.WriteLine($"\nFactor is ---- {factor} ----\n");
             byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
             float[] float_v = new float[pixels.Length];
             float[] factor_v = new float[8];
@@ -73,7 +74,7 @@ namespace ImageViewer.Model
             {
                 fixed (float* array = float_v, coeff = factor_v)
                 {
-                    proxy.executeAsmContrastFilter(array, coeff, pixels.Length);
+                    proxy.executeAsmContrastFilter(array, coeff, pixels.Length * 4);
                 }
 
             }

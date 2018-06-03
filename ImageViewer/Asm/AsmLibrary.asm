@@ -72,8 +72,8 @@ asmContrastFilter proc
 mainloop :
 	vmovupd ymm0, [r9] ;load chunk of data
 	vmovupd ymm1, [rdx] ;load coefficient
-	vmovaps ymm2, middle ;load middle value for calculation
-	vmovaps ymm3, masktable ;load masked table
+	vmovups ymm2, middle ;load middle value for calculation
+	vmovups ymm3, masktable ;load masked table
 	VSUBPS  ymm0, ymm0, ymm2
 	VMULPS ymm0, ymm0, ymm1
 	VADDPS ymm0, ymm0, ymm2
