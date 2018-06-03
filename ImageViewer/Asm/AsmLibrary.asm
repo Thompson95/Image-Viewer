@@ -101,54 +101,51 @@ mov r10, 0
 mov r11, rbx
 mov r9, rdx
 mov esi, 3
-;Zaladowanie adresu obrazka do rejestru edi
+; Loading bitmap to edi register
 mov edi, bitmap
 
-;zaladowanie do ecx ilosci bitow do przetworzenia
+; Loading bitmap size to ecx register
 mov ecx, stop
 
-;movlps xmm3, color_and
-;movlps xmm5, trzy
-;movlps xmm6, alpha_and
 vpshufd xmm3, xmm3, 00h
 vpshufd xmm5, xmm5, 00h
 vpshufd xmm6, xmm6, 00h
 
-;zamiana wartosci na float w celu umozliwienia wykonania dzielenia wektorowego
+; Parsing into float to allow for vector division
 cvtdq2ps xmm4, xmm5 
 
 startloop:
 MOVDQU xmm0, [edi]
 vmovaps xmm1, xmm0
-;zapamietanie skladowych alpha 4 kolejnych pikseli w rejestrze xmm7
+; Loading alpha of 4 next pixels into xmm7 register
 vmovaps xmm7, xmm0 
 pand xmm7, xmm6
 psrldq xmm1, 1
 vmovaps xmm2, xmm1
 psrldq xmm2, 1
-pand xmm0, xmm3 ; wyzerowanie skladowych a,g,b
-pand xmm1, xmm3 ; wyzerowanie skladowych a,r,b
-pand xmm2, xmm3 ; wyzerowanie skladowych a,r,g
-paddd xmm0, xmm1 ; zsumowanie skladowych r, g
-paddd xmm0, xmm2 ; zsumowanie skladowych r, g, b
-;dzielenie wartosci 3 kolejnych pikseli przez 3
-vcvtdq2ps xmm1, xmm0 ; konwersja 32-bitowych liczb ca³kowitych na zmiennoprzecinkowe
-divps xmm1, xmm4 ; dzielenie wektorowe
-vcvtps2dq xmm0, xmm1 ; konwersja wektora liczb zmiennoprzecinkowych podwójnej/pojedynczej precyzji na 32-bitowy wektor liczby ca³kowitych
-;wypelnienie rejestru ci¹gami 0, g, g, g gdzie g = (r + b + g) / 3
+pand xmm0, xmm3 ; Zeroing a,g,b
+pand xmm1, xmm3 ; Zeroing skladowych a,r,b
+pand xmm2, xmm3 ; Zeroing a,r,g
+paddd xmm0, xmm1 ; Summing r, g
+paddd xmm0, xmm2 ; Summing r, g, b
+; Dividing 3 next pixels' values by 3
+vcvtdq2ps xmm1, xmm0 ; Parsing int into float
+divps xmm1, xmm4 ; Vector division
+vcvtps2dq xmm0, xmm1 ; Parsing float into int
+; Filling register with 0, g, g, g gdzie g = (r + b + g) / 3
 vmovaps xmm1, xmm0
 pslldq xmm0, 1
 por xmm1, xmm0
 pslldq xmm0, 1
 
-;przepisanie wartosci kanalu alpha
+; Copy alpha
 por xmm1, xmm0
 por xmm1, xmm7
 
-;wyslanie 4 pikseli do tablicy wynikowej
+; 4 pixels sent to results
 movdqu [edi], xmm1
 
-; w kazdym przebiegu petli przetwarzane jest 16 bitow
+; 16 bits processed per loop
 add edi, 16
 sub ecx, 15
 
@@ -159,32 +156,32 @@ mov edi, bitmap
 mov ecx, stop
 
 
-;koloryzacja na sepie
+; Coloring for sepia
 startloop2:
 
-;zwiêkszenie koloru zielonego
+; Increase green
 mov al,[edi+1]
-cmp al, 215 ;sprawdza czy po dodaniu nie zostanie przekroczone 255
+cmp al, 215 ; Avoid overflowing 255
 ja ifbigger1
 add al, 30
 jmp next1
 
 ifbigger1:
-mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby max
+mov al, 255 ; Colour value cannot be bigger than 255
 
 next1:
 mov [edi+1], al
 
 
-;podwójne zwiêkszenie czerwonego
+; Double increase of red
 mov al,[edi+2]
-cmp al, 185 ;sprawdza czy po dodaniu nie zostanie przekroczone 255
+cmp al, 185 ; Avoid overflowing 255
 ja ifbigger2
 add al, 60
 jmp next2
 
 ifbigger2:
-mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby maxs
+mov al, 255 ; Colour value cannot be bigger than 255
 
 next2:
 mov [edi+2], al
