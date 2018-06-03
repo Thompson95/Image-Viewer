@@ -24,5 +24,12 @@ namespace ImageViewer.Model
         {
             asmBrightnessFilter(bitmap, length, value);
         }
+        [DllImport("Asm.dll")]
+        private static extern void asmSepiaFilter(byte* bitmap, int length, byte value);
+
+        public void executeAsmSepiaFilter(byte* bitmap, int length, byte value)
+        {
+            asmBrightnessFilter(bitmap, length, value);
+        }
     }
 }
