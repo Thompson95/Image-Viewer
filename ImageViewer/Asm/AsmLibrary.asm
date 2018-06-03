@@ -1,3 +1,8 @@
+.data
+middle DWORD 8 dup(128.0)
+
+masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
+
 .code
 asmNegativeFilter proc
 	mov r10, 0
@@ -59,3 +64,24 @@ loopEnd :
 	ret
 asmBrightnessFilter endp
 end
+
+asmContrastFilter proc
+	mov r9, rcx
+	mov r10, 0
+	mov r11, rcx
+	add r11, rbx
+mainloop :
+	vmovupd ymm0, [r9] ;load chunk of data
+	vmovupd ymm1, [rdx] ;load coefficient
+	vmovaps ymm2, middle ;load middle value for calculation
+	vmovaps ymm3, masktable ;load masked table
+	VSUBPS  ymm0, ymm0, ymm2
+	VMULPS ymm0, ymm0, ymm1
+	VADDPS ymm0, ymm0, ymm2
+	VROUNDPS ymm0, ymm0, 1
+	vmaskmovps [r9], ymm3, ymm0
+	add r9, 32
+	cmp r9, r11
+	jl mainloop
+	ret
+asmContrastFilter endp

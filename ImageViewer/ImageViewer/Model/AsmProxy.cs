@@ -24,5 +24,13 @@ namespace ImageViewer.Model
         {
             asmBrightnessFilter(bitmap, length, value);
         }
+
+        [DllImport("Asm.dll")]
+        private static extern void asmContrastFilter(float* bitmap, float* coeff, int value);
+
+        public void executeAsmContrastFilter(float* bitmap, float* coeff, int value)
+        {
+            asmContrastFilter(bitmap, coeff, value);
+        }
     }
 }
