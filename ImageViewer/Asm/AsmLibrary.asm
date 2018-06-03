@@ -94,4 +94,118 @@ mainloop :
 	ret
 asmContrastFilter endp
 
+asmSepiaFilter PROC bitmap : dword, start : dword, stop : dword
+pushad
+
+
+mov esi, 3
+;Zaladowanie adresu obrazka do rejestru edi
+mov edi, bitmap
+
+;dodanie offsetu zwiazanego z podzialem na watki
+add edi, start 
+
+;zaladowanie do ecx ilosci bitow do przetworzenia
+mov ecx, stop
+sub ecx, start
+
+vmovlps ymm3, color_and
+vmovlps ymm5, trzy
+vmovlps ymm6, alpha_and
+vpshufd ymm3, ymm3, 00h
+vpshufd ymm5, ymm5, 00h
+vpshufd ymm6, ymm6, 00h
+
+;zamiana wartosci na float w celu umozliwienia wykonania dzielenia wektorowego
+vcvtdq2ps ymm4, ymm5 
+
+startloop:
+vmovdqu ymm0, [edi]
+vmovaps ymm1, ymm0
+
+;zapamietanie skladowych alpha 4 kolejnych pikseli w rejestrze xmm7
+vmovaps ymm7, ymm0 
+vpand ymm7, ymm6
+
+vpsrldq ymm1, 1
+vmovaps ymm2, ymm1
+vpsrldq ymm2, 1
+
+vpand ymm0, ymm3 ; wyzerowanie skladowych a,g,b
+vpand ymm1, ymm3 ; wyzerowanie skladowych a,r,b
+vpand ymm2, ymm3 ; wyzerowanie skladowych a,r,g
+
+vpaddd ymm0, ymm1 ; zsumowanie skladowych r, g
+vpaddd ymm0, ymm2 ; zsumowanie skladowych r, g, b
+
+;dzielenie wartosci 3 kolejnych pikseli przez 3
+vcvtdq2ps ymm1, ymm0 ; konwersja 32-bitowych liczb ca³kowitych na zmiennoprzecinkowe
+vdivps ymm1, ymm4 ; dzielenie wektorowe
+vcvtps2dq xmm0, xmm1 ; konwersja wektora liczb zmiennoprzecinkowych podwójnej/pojedynczej precyzji na 32-bitowy wektor liczby ca³kowitych
+
+;wypelnienie rejestru ci¹gami 0, g, g, g gdzie g = (r + b + g) / 3
+vmovaps ymm1, ymm0
+vpslldq ymm0, 1
+vpor ymm1, ymm0
+vpslldq ymm0, 1
+
+;przepisanie wartosci kanalu alpha
+vpor ymm1, ymm0
+vpor ymm1, ymm7
+
+;wyslanie 4 pikseli do tablicy wynikowej
+vmovdqu [edi], ymm1
+
+; w kazdym przebiegu petli przetwarzane jest 16 bitow
+add edi, 16
+sub ecx, 15
+
+
+loop startloop
+
+mov edi, bitmap
+add edi, start 
+mov ecx, stop
+sub ecx, start
+
+
+;koloryzacja na sepie
+startloop2:
+
+;zwiêkszenie koloru zielonego
+mov al,[edi+1]
+cmp al, 215 ;sprawdza czy po dodaniu nie zostanie przekroczone 255
+ja ifbigger1
+add al, 30
+jmp next1
+
+ifbigger1
+mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby max
+
+next1:
+mov [edi+1], al
+
+
+;podwójne zwiêkszenie czerwonego
+mov al,[edi+2]
+cmp al, 185 ;sprawdza czy po dodaniu nie zostanie przekroczone 255
+ja ifbigger2
+add al, 60
+jmp next2
+
+ifbigger2:
+mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby maxs
+
+next2:
+mov [edi+2], al
+
+add edi, 4
+sub ecx, 3
+loop startloop2
+
+
+popad
+rel
+asmSepiaFilter endp
+
 end
