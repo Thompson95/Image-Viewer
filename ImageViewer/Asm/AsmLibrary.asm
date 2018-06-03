@@ -94,7 +94,7 @@ mainloop :
 	ret
 asmContrastFilter endp
 
-asmSepiaFilter PROC bitmap : dword, start : dword, stop : dword
+asmSepiaFilter PROC bitmap : dword, stop : dword
 pushfq 
 
 mov r10, 0
@@ -104,12 +104,8 @@ mov esi, 3
 ;Zaladowanie adresu obrazka do rejestru edi
 mov edi, bitmap
 
-;dodanie offsetu zwiazanego z podzialem na watki
-add edi, start 
-
 ;zaladowanie do ecx ilosci bitow do przetworzenia
 mov ecx, stop
-sub ecx, start
 
 ;movlps xmm3, color_and
 ;movlps xmm5, trzy
@@ -160,9 +156,7 @@ sub ecx, 15
 loop startloop
 
 mov edi, bitmap
-add edi, start 
 mov ecx, stop
-sub ecx, start
 
 
 ;koloryzacja na sepie

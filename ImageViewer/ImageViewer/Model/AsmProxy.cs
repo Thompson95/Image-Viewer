@@ -34,11 +34,11 @@ namespace ImageViewer.Model
         }
 
         [DllImport("Asm.dll")]
-        private static extern void asmSepiaFilter(byte* bitmap, int start, int stop);
+        private static extern void asmSepiaFilter(byte* bitmap, int size);
 
-        public void executeAsmSepiaFilter(byte* bitmap, int start, int stop)
+        public void executeAsmSepiaFilter(byte* bitmap, int size)
         {
-            asmSepiaFilter(bitmap, start, stop);
+            asmSepiaFilter(bitmap, size);
         }
 
 
