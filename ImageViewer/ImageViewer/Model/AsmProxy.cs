@@ -32,5 +32,15 @@ namespace ImageViewer.Model
         {
             asmContrastFilter(bitmap, coeff, value);
         }
+
+        [DllImport("Asm.dll")]
+        private static extern void asmSepiaFilter(byte* bitmap, int start, int stop);
+
+        public void executeAsmSepiaFilter(byte* bitmap, int start, int stop)
+        {
+            asmSepiaFilter(bitmap, start, stop);
+        }
+
+
     }
 }

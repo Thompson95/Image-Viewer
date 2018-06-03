@@ -18,22 +18,34 @@ namespace ImageViewer.Model
 
         public static BitmapSource Negative(BitmapSource source)
         {
-            AsmProxy proxy = new AsmProxy();
-            int size, stride;
-            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
-            unsafe
-            {
-                fixed(byte* array = pixels)
+                AsmProxy proxy = new AsmProxy();
+                int size, stride;
+                byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
+                unsafe
                 {
-                    proxy.executeAsmNegativeFilter(array, size);
+                    fixed(byte* array = pixels)
+                    {
+                        proxy.executeAsmNegativeFilter(array, size);
+                    }
                 }
-            }
-            BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
+                BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return result;
         }
 
         public static BitmapSource Sepia(BitmapSource source)
         {
+            AsmProxy proxy = new AsmProxy();
+            int size, stride;
+            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
+            unsafe
+            {
+                fixed (byte* array = pixels)
+                {
+                    int stop = *array + size; 
+                    proxy.executeAsmSepiaFilter(array, *array, stop);
+                }
+            }
+            BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return source;
         }
         public static BitmapSource Brightness(BitmapSource source, Byte value)

@@ -95,9 +95,11 @@ mainloop :
 asmContrastFilter endp
 
 asmSepiaFilter PROC bitmap : dword, start : dword, stop : dword
-pushad
+pushfq 
 
-
+mov r10, 0
+mov r11, rbx
+mov r9, rdx
 mov esi, 3
 ;Zaladowanie adresu obrazka do rejestru edi
 mov edi, bitmap
@@ -109,52 +111,46 @@ add edi, start
 mov ecx, stop
 sub ecx, start
 
-vmovlps ymm3, color_and
-vmovlps ymm5, trzy
-vmovlps ymm6, alpha_and
-vpshufd ymm3, ymm3, 00h
-vpshufd ymm5, ymm5, 00h
-vpshufd ymm6, ymm6, 00h
+;movlps xmm3, color_and
+;movlps xmm5, trzy
+;movlps xmm6, alpha_and
+vpshufd xmm3, xmm3, 00h
+vpshufd xmm5, xmm5, 00h
+vpshufd xmm6, xmm6, 00h
 
 ;zamiana wartosci na float w celu umozliwienia wykonania dzielenia wektorowego
-vcvtdq2ps ymm4, ymm5 
+cvtdq2ps xmm4, xmm5 
 
 startloop:
-vmovdqu ymm0, [edi]
-vmovaps ymm1, ymm0
-
+MOVDQU xmm0, [edi]
+vmovaps xmm1, xmm0
 ;zapamietanie skladowych alpha 4 kolejnych pikseli w rejestrze xmm7
-vmovaps ymm7, ymm0 
-vpand ymm7, ymm6
-
-vpsrldq ymm1, 1
-vmovaps ymm2, ymm1
-vpsrldq ymm2, 1
-
-vpand ymm0, ymm3 ; wyzerowanie skladowych a,g,b
-vpand ymm1, ymm3 ; wyzerowanie skladowych a,r,b
-vpand ymm2, ymm3 ; wyzerowanie skladowych a,r,g
-
-vpaddd ymm0, ymm1 ; zsumowanie skladowych r, g
-vpaddd ymm0, ymm2 ; zsumowanie skladowych r, g, b
-
+vmovaps xmm7, xmm0 
+pand xmm7, xmm6
+psrldq xmm1, 1
+vmovaps xmm2, xmm1
+psrldq xmm2, 1
+pand xmm0, xmm3 ; wyzerowanie skladowych a,g,b
+pand xmm1, xmm3 ; wyzerowanie skladowych a,r,b
+pand xmm2, xmm3 ; wyzerowanie skladowych a,r,g
+paddd xmm0, xmm1 ; zsumowanie skladowych r, g
+paddd xmm0, xmm2 ; zsumowanie skladowych r, g, b
 ;dzielenie wartosci 3 kolejnych pikseli przez 3
-vcvtdq2ps ymm1, ymm0 ; konwersja 32-bitowych liczb ca³kowitych na zmiennoprzecinkowe
-vdivps ymm1, ymm4 ; dzielenie wektorowe
+vcvtdq2ps xmm1, xmm0 ; konwersja 32-bitowych liczb ca³kowitych na zmiennoprzecinkowe
+divps xmm1, xmm4 ; dzielenie wektorowe
 vcvtps2dq xmm0, xmm1 ; konwersja wektora liczb zmiennoprzecinkowych podwójnej/pojedynczej precyzji na 32-bitowy wektor liczby ca³kowitych
-
 ;wypelnienie rejestru ci¹gami 0, g, g, g gdzie g = (r + b + g) / 3
-vmovaps ymm1, ymm0
-vpslldq ymm0, 1
-vpor ymm1, ymm0
-vpslldq ymm0, 1
+vmovaps xmm1, xmm0
+pslldq xmm0, 1
+por xmm1, xmm0
+pslldq xmm0, 1
 
 ;przepisanie wartosci kanalu alpha
-vpor ymm1, ymm0
-vpor ymm1, ymm7
+por xmm1, xmm0
+por xmm1, xmm7
 
 ;wyslanie 4 pikseli do tablicy wynikowej
-vmovdqu [edi], ymm1
+movdqu [edi], xmm1
 
 ; w kazdym przebiegu petli przetwarzane jest 16 bitow
 add edi, 16
@@ -179,7 +175,7 @@ ja ifbigger1
 add al, 30
 jmp next1
 
-ifbigger1
+ifbigger1:
 mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby max
 
 next1:
@@ -204,8 +200,8 @@ sub ecx, 3
 loop startloop2
 
 
-popad
-rel
+popfq
+ret
 asmSepiaFilter endp
 
 end
