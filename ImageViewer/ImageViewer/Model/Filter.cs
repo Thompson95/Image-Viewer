@@ -41,8 +41,8 @@ namespace ImageViewer.Model
             {
                 fixed (byte* array = pixels)
                 {
-                    int stop = *array + size; 
-                    proxy.executeAsmSepiaFilter(array, *array, stop);
+                    //int stop = *array + size; 
+                    proxy.executeAsmSepiaFilter(array, size);
                 }
             }
             BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
