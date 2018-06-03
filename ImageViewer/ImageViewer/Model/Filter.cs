@@ -58,7 +58,29 @@ namespace ImageViewer.Model
         }
         public static BitmapSource Contrast(BitmapSource source, Byte value)
         {
-            return source;
+            AsmProxy proxy = new AsmProxy();
+            int size, stride;
+            int c = value - 128;
+            float factor = 259 * (c + 255) / (255 * (259 - c));
+            byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
+            float[] float_v = new float[pixels.Length];
+            float[] factor_v = new float[8];
+            for (int i = 0; i < pixels.Length; i++)
+                float_v[i] = (float)pixels[i];
+            for (int i = 0; i < 8; i++)
+                factor_v[i] = factor;
+            unsafe
+            {
+                fixed (float* array = float_v, coeff = factor_v)
+                {
+                    proxy.executeAsmContrastFilter(array, coeff, pixels.Length);
+                }
+
+            }
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = (byte)float_v[i];
+            BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
+            return result;
         }
     }
 }
