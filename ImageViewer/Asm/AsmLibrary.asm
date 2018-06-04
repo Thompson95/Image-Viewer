@@ -94,7 +94,7 @@ jl mainloop
 ret
 asmContrastFilter endp
 
-asmSepiaFilter PROC bitmap : dword, stop : dword
+asmSepiaFilter proc
 pushfq
 
 mov r10, 0
