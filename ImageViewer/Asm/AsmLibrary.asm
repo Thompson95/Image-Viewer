@@ -102,10 +102,12 @@ mov r11, rbx
 mov r9, rdx
 mov esi, 3
 ;Zaladowanie adresu obrazka do rejestru edi
-mov edi, bitmap
+mov rdi, rcx
+mov r14, rcx
+mov r15, rdx
 
 ;zaladowanie do ecx ilosci bitow do przetworzenia
-mov ecx, stop
+mov rcx, rdx
 
 ;movlps xmm3, color_and
 ;movlps xmm5, trzy
@@ -118,7 +120,7 @@ vpshufd xmm6, xmm6, 00h
 cvtdq2ps xmm4, xmm5 
 
 startloop:
-MOVDQU xmm0, [edi]
+vmovdqu xmm0, xmmword ptr[rdi]
 vmovaps xmm1, xmm0
 ;zapamietanie skladowych alpha 4 kolejnych pikseli w rejestrze xmm7
 vmovaps xmm7, xmm0 
@@ -146,24 +148,24 @@ por xmm1, xmm0
 por xmm1, xmm7
 
 ;wyslanie 4 pikseli do tablicy wynikowej
-movdqu [edi], xmm1
+movdqu [rdi], xmm1
 
 ; w kazdym przebiegu petli przetwarzane jest 16 bitow
-add edi, 16
-sub ecx, 15
+add rdi, 16
+sub rcx, 15
 
 
 loop startloop
 
-mov edi, bitmap
-mov ecx, stop
+mov rdi, r14
+mov rcx, r15
 
 
 ;koloryzacja na sepie
 startloop2:
 
 ;zwiêkszenie koloru zielonego
-mov al,[edi+1]
+mov al,[rdi+1]
 cmp al, 215 ;sprawdza czy po dodaniu nie zostanie przekroczone 255
 ja ifbigger1
 add al, 30
@@ -173,11 +175,11 @@ ifbigger1:
 mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby max
 
 next1:
-mov [edi+1], al
+mov [rdi+1], al
 
 
 ;podwójne zwiêkszenie czerwonego
-mov al,[edi+2]
+mov al,[rdi+2]
 cmp al, 185 ;sprawdza czy po dodaniu nie zostanie przekroczone 255
 ja ifbigger2
 add al, 60
@@ -187,10 +189,10 @@ ifbigger2:
 mov al, 255 ;ustawia max jeœli dodawanie przekroczy³oby maxs
 
 next2:
-mov [edi+2], al
+mov [rdi +2], al
 
-add edi, 4
-sub ecx, 3
+add rdi, 4
+sub rcx, 3
 loop startloop2
 
 
