@@ -32,5 +32,21 @@ namespace ImageViewer.Model
         {
             asmContrastFilter(bitmap, coeff, value);
         }
+
+        [DllImport("Asm.dll")]
+        private static extern void asmByteToFloat(byte* bitmap, float* array, int length);
+
+        public void executeAsmByteToFloat(byte* bitmap, float* array, int length)
+        {
+            asmByteToFloat(bitmap, array, length);
+        }
+
+        [DllImport("Asm.dll")]
+        private static extern void asmFloatToByte(float* array, byte* bitmap, int length);
+
+        public void executeAsmFloatToByte(float* array, byte* bitmap, int length)
+        {
+            asmFloatToByte(array, bitmap, length);
+        }
     }
 }
