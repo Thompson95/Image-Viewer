@@ -64,8 +64,6 @@ namespace ImageViewer.Model
             float factor = (float)(259 * (c + 255)) / (float)(255 * (259 - c));
             byte[] pixels = new BitmapWorker().GetByteArray(source, out size, out stride);
             float[] float_v = new float[pixels.Length];
-            for (int i = 0; i < pixels.Length; i++)
-                float_v[i] = (float)pixels[i];
             float[] factor_v = new float[8];
             for (int i = 0; i < 8; i++)
                 factor_v[i] = factor;
@@ -73,11 +71,14 @@ namespace ImageViewer.Model
             {
                 fixed (float* array = float_v, coeff = factor_v)
                 {
-                    proxy.executeAsmContrastFilter(array, coeff, pixels.Length * 4);
+                    fixed (byte* bitmap = pixels)
+                    {
+                        proxy.executeAsmByteToFloat(bitmap, array, pixels.Length);
+                        proxy.executeAsmContrastFilter(array, coeff, pixels.Length * 4);
+                        proxy.executeAsmFloatToByte(array, bitmap, pixels.Length);
+                    }
                 }
             }
-            for (int i = 0; i < pixels.Length; i++)
-                pixels[i] = (byte)float_v[i];
             BitmapSource result = BitmapSource.Create(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, source.Format, source.Palette, pixels, stride);
             return result;
         }

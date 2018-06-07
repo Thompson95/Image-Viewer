@@ -7,6 +7,7 @@ middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
+perms BYTE 02h, 06h, 0ah, 0eh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh
 .code
 asmNegativeFilter proc
 	mov r10, 0
@@ -93,5 +94,110 @@ mainloop :
 	jl mainloop
 	ret
 asmContrastFilter endp
+
+asmByteToFloat proc
+	mov r9, rcx
+	mov r11, rcx
+	add r11, rbx
+	mov r10, rdx
+	xor r12, r12
+	vmovupd xmm0, [r9]
+firstloop :
+	VPMOVZXBD xmm1, xmm0
+	VCVTDQ2PS xmm1, xmm1
+	vmovupd [r10], xmm1
+	VPSRLDQ xmm0, xmm0, 04h
+	add r10, 010h
+	inc r12
+	cmp r12, 04h
+	jl firstloop
+	add r9, 010h
+	xor r12, r12		
+	mov edx, 0 ; clear dividend, high
+	mov eax, ebx ; dividend, low
+	mov ecx, 010h ; divisor
+	div ecx ;
+	cmp rdx, 0
+	je mainloop
+	sub r9, 010h
+	add r9, rdx
+	sub r10, 040h
+	mov eax, 04h
+	mul rdx
+	add r10, rax
+mainloop :
+	vmovupd xmm0, [r9]
+helploop :
+	VPMOVZXBD xmm1, xmm0
+	VCVTDQ2PS xmm1, xmm1
+	vmovupd [r10], xmm1
+	VPSRLDQ xmm0, xmm0, 04h
+	add r10, 010h
+	inc r12
+	cmp r12, 04h
+	jl helploop
+	xor r12, r12
+	add r9, 010h
+	cmp r9, r11
+	jl mainloop
+	ret
+asmByteToFloat endp
+
+asmFloatToByte proc
+	mov r9, rcx
+	mov r8, rcx
+	mov r11, rcx
+	mov r10, rdx
+	xor r12, r12
+	mov eax, 04h
+	mul rbx
+	add r11, rax
+	vmovupd xmm2, xmmword ptr[perms]
+firstloop :
+	vmovupd xmm0, [r9]
+	VCVTPS2DQ xmm0, xmm0
+	VPSLLDQ xmm0, xmm0, 02h
+	VPSHUFB xmm1, xmm0, xmm2
+	VPADDB xmm3, xmm3, xmm1
+	VPSLLDQ xmm2, xmm2, 04h
+	add r9, 010h
+	inc r12
+	cmp r12, 04h
+	jl firstloop
+	vmovupd [r10], xmm3
+	xor r12, r12
+	mov edx, 0 ; clear dividend, high
+	mov eax, ebx ; dividend, low
+	mov ecx, 010h ; divisor
+	div ecx ;
+	cmp rdx, 0
+	je mainloop
+	mov eax, 04h
+	add r10, rdx
+	mul rdx
+	add r8, rax
+	VXORPS xmm3, xmm3, xmm3
+mainloop :
+	vmovupd xmm2, xmmword ptr[perms]
+workloop :
+	vmovupd xmm0, [r8]
+	VCVTPS2DQ xmm0, xmm0
+	VPSLLDQ xmm0, xmm0, 02h
+	VPSHUFB xmm1, xmm0, xmm2
+	VPADDB xmm3, xmm3, xmm1
+	VPSLLDQ xmm2, xmm2, 04h
+	add r8, 010h
+	inc r12
+	cmp r12, 04h
+	jl workloop
+	vmovupd [r10], xmm3
+	xor r12, r12
+	VXORPS xmm3, xmm3,xmm3
+	add r10, 010h
+	cmp r8, r11
+	jl mainloop
+	ret
+asmFloatToByte endp
+
 
 end
