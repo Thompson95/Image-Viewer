@@ -8,6 +8,7 @@ masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
 perms BYTE 02h, 06h, 0ah, 0eh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh
+cperms BYTE 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 0fh, 02h, 06h, 0ah, 0eh
 .code
 asmNegativeFilter proc
 	mov r10, 0
@@ -94,6 +95,80 @@ mainloop :
 	jl mainloop
 	ret
 asmContrastFilter endp
+
+asmContrastFilterPro proc
+	mov r9, rcx
+	mov r11, rcx
+	add r11, rdi
+	xor r12, r12
+	VPSHUFD xmm4, xmm1, 00h
+	VDIVPS xmm4, xmm4, xmm4
+	VPSLLDQ xmm4, xmm4, 0ch
+	vmovupd xmm0, [r9]												; load 16 bytes
+	VPSHUFD xmm1, xmm1, 0c0h										; load coefficient and vectorize
+	VPADDB xmm1, xmm1, xmm4
+	VXORPS xmm4, xmm4, xmm4											; clean temp array
+firstloop :
+	VPSRLDQ xmm4, xmm4, 04h											; shift right to make place for next 4 bytes
+	VPMOVZXBD xmm2, xmm0											; move with zero extend low 4 bytes
+	VPSRLDQ xmm0, xmm0, 04h											; shift data chunk left by 4 bytes
+	VCVTDQ2PS xmm2, xmm2											; convert to float
+	VSUBPS xmm2, xmm2, middle
+	VMULPS xmm2, xmm2, xmm1
+	VADDPS xmm2, xmm2, middle
+	VROUNDPS xmm2, xmm2, 1
+	VCMPPS xmm3, xmm2, highval, 5									; generate mask if overflow
+	VBLENDVPS xmm2, xmm2, highval, xmm3								; substitute values higher than 255
+	VCMPPS xmm3, xmm2, lowval, 1									; generate mask if overflow
+	VBLENDVPS xmm2, xmm2, lowval, xmm3								; substitute values lower than 0
+	VCVTPS2DQ xmm2, xmm2 ;convert to dword integer
+	VPSLLDQ xmm2, xmm2, 02h ;shift 2 byte left
+	VPSHUFB xmm2, xmm2, xmmword ptr[cperms]							; permute
+	VPADDB xmm4, xmm4, xmm2											; store in temp register
+	inc r12
+	cmp r12, 04h
+	jl firstloop
+	vmovupd [r9], xmm4
+	add r9, 010h
+	xor r12, r12		
+	mov edx, 0														; clear dividend, high
+	mov rax, rdi ; dividend, low
+	mov ecx, 010h ; divisor
+	div ecx ;
+	cmp rdx, 0
+	je mainloop
+	sub r9, 010h
+	add r9, rdx
+mainloop :
+	vmovupd xmm0, [r9]
+	VXORPS xmm4, xmm4, xmm4
+	xor r12, r12
+helploop :
+	VPSRLDQ xmm4, xmm4, 04h											; shift right to make place for next 4 bytes
+	VPMOVZXBD xmm2, xmm0											; move with zero extend low 4 bytes
+	VPSRLDQ xmm0, xmm0, 04h											; shift data chunk left by 4 bytes
+	VCVTDQ2PS xmm2, xmm2											; convert to float
+	VSUBPS xmm2, xmm2, middle
+	VMULPS xmm2, xmm2, xmm1
+	VADDPS xmm2, xmm2, middle
+	VROUNDPS xmm2, xmm2, 1
+	VCMPPS xmm3, xmm2, highval, 5									; generate mask if overflow
+	VBLENDVPS xmm2, xmm2, highval, xmm3								; substitute values higher than 255
+	VCMPPS xmm3, xmm2, lowval, 1									; generate mask if overflow
+	VBLENDVPS xmm2, xmm2, lowval, xmm3								; substitute values lower than 0
+	VCVTPS2DQ xmm2, xmm2 ;convert to dword integer
+	VPSLLDQ xmm2, xmm2, 02h ;shift 2 byte left
+	VPSHUFB xmm2, xmm2, xmmword ptr[cperms]							; permute
+	VPADDB xmm4, xmm4, xmm2											; store in temp register
+	inc r12
+	cmp r12, 04h
+	jl helploop
+	vmovupd [r9], xmm4	
+	add r9, 010h
+	cmp r9, r11
+	jl mainloop
+	ret
+asmContrastFilterPro endp
 
 asmByteToFloat proc
 	mov r9, rcx
