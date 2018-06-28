@@ -40,7 +40,5 @@ namespace ImageViewer.Model
         {
             asmSepiaFilter(bitmap, stop);
         }
-
-
     }
 }
