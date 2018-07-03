@@ -1,14 +1,19 @@
 .data
-alphaMask byte 4 dup(0FFh, 0FFh, 0FFh, 000h)
-negAlphaMask byte 4 dup(000h, 000h, 000h, 0FFh)
-array255 byte 16 dup(0FFh)
-treshold qword 010h
+alphaMask byte 4 dup(0FFh, 0FFh, 0FFh, 000h) ; 255, 255, 255, 0
+negAlphaMask byte 4 dup(000h, 000h, 000h, 0FFh) ; 0, 0, 0, 255
+array255 byte 16 dup(0FFh) ; 255
+treshold qword 010h ; 16
 middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
-.code
+colour qword 004h
+val3 DWORD 2 dup(3.0)
+val255 DWORD 2 dup(255.0)
+greenLimit DWORD 2 dup(195.0)
+redLimit DWORD 2 dup(225.0)
 
+.code
 asmNegativeFilter proc
 	mov r10, 0
 	mov r11, rbx
@@ -20,6 +25,9 @@ loopStart :
 	vmovaps xmm1, xmmword ptr[alphaMask]
 	vmovaps xmm0, xmmword ptr[array255]
 	vpsubb xmm3, xmm0, xmm2
+	vpand xmm3, xmm3, xmmword ptr [alphaMask]
+	vpand xmm2, xmm2, xmmword ptr [negAlphaMask]
+	vpaddb xmm3, xmm3, xmm2
 	vpand xmm3, xmm3, xmmword ptr [alphaMask]
 	vpand xmm2, xmm2, xmmword ptr [negAlphaMask]
 	vpaddb xmm3, xmm3, xmm2
@@ -98,90 +106,54 @@ asmContrastFilter endp
 
 
 asmSepiaFilter proc
-pushfq
+	mov r10, 0 ; r10 = 0
+	mov r11, rbx ; r11 = rbx
+	mov r9, rdx ; r9 = rdx
+	jmp loopEnd ; go to loopEnd
 
-mov r10, 0
-mov r11, rbx
-mov r9, rdx
-mov esi, 3
-mov rdi, rcx
-mov r14, rcx
-mov r15, rdx
+loopStart :
+	vmovupd xmm1, xmmword ptr[rcx + r10] ; red
+	add r10, colour ; red to green
+	vmovupd xmm2, xmmword ptr[rcx + r10] ; green
+	add r10, colour ; green to blue
+	vmovupd xmm3, xmmword ptr[rcx + r10] ; blue
+	vaddpd xmm0, xmm0, xmm1
+	vaddpd xmm0, xmm0, xmm2
+	vmovups xmm3, val3
+	vdivpd xmm0, xmm0, xmm3
+	vmovups xmm0, val255
+	vmovupd xmmword ptr [rcx + r10], xmm3 ; blue
+	sub r10, colour ; blue to green
+	vmovupd xmmword ptr [rcx + r10], xmm2 ; green
+	sub r10, colour ; green to red
+	vmovupd xmmword ptr [rcx + r10], xmm1 ; red
+	vmovupd xmm1, xmm0
+	vmovups xmm3, greenLimit
+	cmpps xmm1, xmm3, 6
+	jl tooMuchGreen
+greensGood : 
+	vmovupd xmmword ptr[rcx + r10], xmm1 ; green
+	sub r10, colour ; green to red
+	vmovupd xmm1, xmm0
+	vmovups xmm3, redLimit
+	cmpps xmm1, xmm3, 6
+	jl tooMuchRed
+redsGood :
+	vmovupd xmmword ptr[rcx + r10], xmm1 ; red
+	add r10, treshold ; r10 = r10 + 16
+loopEnd :
+	cmp r10, r9 ; compare r10 (0) and r9 ; how much of the image left
+	jl loopStart ; if r10 (0) < r9, go to loopStart
+	mov rbx, r11 ; rbx = r11
+	ret
 
-mov rcx, rdx
+tooMuchGreen :
+	vmovups xmm1, val255
+	jmp greensGood
 
-vpshufd xmm3, xmm3, 00h
-vpshufd xmm5, xmm5, 00h
-vpshufd xmm6, xmm6, 00h
+tooMuchRed :
+	vmovups xmm1, val255
+	jmp redsGood
 
-cvtdq2ps xmm4, xmm5
-
-startloop :
-vmovdqu xmm0, xmmword ptr[rdi]
-vmovaps xmm1, xmm0
-vmovaps xmm7, xmm0
-pand xmm7, xmm6
-psrldq xmm1, 1
-vmovaps xmm2, xmm1
-psrldq xmm2, 1
-pand xmm0, xmm3
-pand xmm1, xmm3
-pand xmm2, xmm3
-paddd xmm0, xmm1
-paddd xmm0, xmm2
-vcvtdq2ps xmm1, xmm0
-divps xmm1, xmm4
-vcvtps2dq xmm0, xmm1
-vmovaps xmm1, xmm0
-pslldq xmm0, 1
-por xmm1, xmm0
-pslldq xmm0, 1
-
-por xmm1, xmm0
-por xmm1, xmm7
-
-movdqu[rdi], xmm1
-
-add rdi, 16
-sub rcx, 15
-
-loop startloop
-
-mov rdi, r14
-mov rcx, r15
-
-startloop2 :
-
-mov al, [rdi + 1]
-cmp al, 215
-ja ifbigger1
-add al, 30
-jmp next1
-
-ifbigger1 :
-mov al, 255
-
-next1 :
-mov[rdi + 1], al
-
-mov al, [rdi + 2]
-cmp al, 185
-ja ifbigger2
-add al, 60
-jmp next2
-
-ifbigger2 :
-mov al, 255
-
-next2 :
-mov[rdi + 2], al
-
-add rdi, 4
-sub rcx, 3
-loop startloop2
-
-popfq
-ret
 asmSepiaFilter endp
-
 end
