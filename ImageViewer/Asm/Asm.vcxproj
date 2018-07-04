@@ -104,6 +104,8 @@
       <ModuleDefinitionFile>AsmLibrary.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
       <NoEntryPoint>true</NoEntryPoint>
+      <GenerateMapFile>true</GenerateMapFile>
+      <AssemblyDebug>true</AssemblyDebug>
     </Link>
     <MASM />
   </ItemDefinitionGroup>
