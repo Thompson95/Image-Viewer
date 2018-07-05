@@ -15,7 +15,6 @@ redLimit DWORD 2 dup(225.0)
 nextbit qword 004h
 scale qword 100h
 three qword 003h
-scale2 qword 100000000h
 
 .code
 asmNegativeFilter proc
@@ -114,12 +113,11 @@ asmContrastFilter endp
 asmSepiaFilter proc
 	; parameters processing
 	mov r9, rdx		; size
-	mov r10, 0		; current position
 	mov r11, rbx	; bitmap
 
 	; setup
-	vmovupd xmm7, three
-	cvtdq2ps xmm7, xmm7 ; conversion for division later down the line
+	mov r13, three
+	mov r10, 0			; current position in bitmap
 
 	jmp loopEnd
 
@@ -135,111 +133,60 @@ loopStart :
 	; the sequence in which the colours are coming is actually blue, green, red, alpha
 	; alpha is ignored both in extraction and rewriting of colour so it stays the same
 
-	vpsubb xmm4, xmm4, xmm4 ; zeroing register for moving bytes
+	vmovupd xmm0, xmmword ptr[rcx+r10] ; taking 16 bytes from the bitmap - that's 4 bits, each having R, G, B and alpha value
 
-	; scale
-	vmovupd xmm5, scale ; scale for moving the bits in registers
-	vmovupd xmm6, scale ; scale for increasing and decreasing scale
-	cvtdq2ps xmm5, xmm5
-	cvtdq2ps xmm6, xmm6
-	; scale must be in xmm so it can be used to multiply or divide them
-
-	vmovupd xmm0, xmmword ptr[rcx+r10]
-
-	pextrb r12, xmm0, 0 ; blue
-	movd xmm3, r12
-	pextrb r12, xmm0, 1 ; green
-	movd xmm2, r12
-	pextrb r12, xmm0, 2 ; red
-	movd xmm1, r12
-	
-	; 3 is alpha is omitted
+	; blue
+	pextrb r12, xmm0, 0
+	pinsrb xmm3, r12, 0
+	; green
+	pextrb r12, xmm0, 1
+	pinsrb xmm2, r12, 0
+	; red
+	pextrb r12, xmm0, 2
+	pinsrb xmm1, r12, 0
 
 	; blue
 	pextrb r12, xmm0, 4
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4		; cvtdq2ps and cvtps2dq are used to multiply registers using mulps
-	mulps xmm4, xmm5		; otherwise mulps returns 0 regardless of contents of registers
-	cvtps2dq xmm4, xmm4		; scale register already converted when set, above
-	vpaddb xmm3, xmm3, xmm4
+	pinsrb xmm3, r12, 1
 	; green
 	pextrb r12, xmm0, 5
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm2, xmm2, xmm4
+	pinsrb xmm2, r12, 1
 	; red
 	pextrb r12, xmm0, 6
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm1, xmm1, xmm4
-	
-	mulps xmm5, xmm6		; increasing scale
-	cvtps2dq xmm5, xmm5
-	cvtdq2ps xmm5, xmm5
+	pinsrb xmm1, r12, 1
 
 	; blue
 	pextrb r12, xmm0, 8
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm3, xmm3, xmm4
+	pinsrb xmm3, r12, 2
 	; green
 	pextrb r12, xmm0, 9
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm2, xmm2, xmm4
+	pinsrb xmm2, r12, 2
 	; red
 	pextrb r12, xmm0, 10
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm1, xmm1, xmm4
-	
-	mulps xmm5, xmm6
-	cvtps2dq xmm5, xmm5
-	;cvtdq2ps xmm5, xmm5
+	pinsrb xmm1, r12, 2
 
 	; blue
 	pextrb r12, xmm0, 12
-	movd xmm4, r12
-	;cvtdq2ps xmm4, xmm4
-	mulsd xmm4, xmm5		; here there be the error, puts 80 into register instead of FF, probably the variable limit is reached
-	;cvtps2dq xmm4, xmm4	; there must be another, simpler and less faulty way of putting a byte in any place in xmm register
-	vpaddb xmm3, xmm3, xmm4
+	pinsrb xmm3, r12, 3
 	; green
 	pextrb r12, xmm0, 13
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm2, xmm2, xmm4
+	pinsrb xmm2, r12, 3
 	; red
 	pextrb r12, xmm0, 14
-	movd xmm4, r12
-	cvtdq2ps xmm4, xmm4
-	mulps xmm4, xmm5
-	cvtps2dq xmm4, xmm4
-	vpaddb xmm1, xmm1, xmm4
+	pinsrb xmm1, r12, 3
 
-	vmovupd xmm5, xmm6
+	vmovupd xmm4, three
+	cvtdq2pd xmm4, xmm4
 
-	cvtdq2ps xmm1, xmm1
-	cvtdq2ps xmm2, xmm2
-	cvtdq2ps xmm3, xmm3
-	divps xmm1, xmm7
-	divps xmm2, xmm7
-	divps xmm3, xmm7
-	cvtps2dq xmm1, xmm1
-	cvtps2dq xmm2, xmm2
-	cvtps2dq xmm3, xmm3
+	cvtdq2pd xmm1, xmm1
+	cvtdq2pd xmm2, xmm2
+	cvtdq2pd xmm3, xmm3
+	divpd xmm1, xmm4	;
+	divpd xmm2, xmm4	; division returns wrogn results for xmm2 and xmm3
+	divpd xmm3, xmm4	;
+	cvtpd2dq xmm1, xmm1
+	cvtpd2dq xmm2, xmm2
+	cvtpd2dq xmm3, xmm3
 
 	;
 	;
