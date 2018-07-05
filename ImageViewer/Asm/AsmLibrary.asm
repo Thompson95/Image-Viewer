@@ -14,7 +14,7 @@ greenLimit DWORD 2 dup(195.0)
 redLimit DWORD 2 dup(225.0)
 nextbit qword 004h
 scale qword 100h
-three qword 003h
+three byte 1 dup(003h)
 
 .code
 asmNegativeFilter proc
@@ -116,7 +116,9 @@ asmSepiaFilter proc
 	mov r11, rbx	; bitmap
 
 	; setup
-	mov r13, three
+	;mov r13, three
+	;vmovupd xmm4, three
+	cvtdq2pd xmm4, xmm4
 	mov r10, 0			; current position in bitmap
 
 	jmp loopEnd
@@ -135,58 +137,117 @@ loopStart :
 
 	vmovupd xmm0, xmmword ptr[rcx+r10] ; taking 16 bytes from the bitmap - that's 4 bits, each having R, G, B and alpha value
 
-	; blue
-	pextrb r12, xmm0, 0
-	pinsrb xmm3, r12, 0
-	; green
-	pextrb r12, xmm0, 1
-	pinsrb xmm2, r12, 0
-	; red
-	pextrb r12, xmm0, 2
-	pinsrb xmm1, r12, 0
+	; diagram is on the photo in the phone
+	; use masks to transform xmm0 into xmm1, xmm2 and xmm3 containing R, G and B
+	; shift R and G to be in the same column as B
+	; add, there is now space for overflow
+	; divide sums by 3 - division takes a lot of time and memory so its good to do it only once
+	; copy and shift the value back into all RGB values in xmm0
+	; using masks detect where R and G are greater than thresholds and set them to 255 there
+	; when implemented in xmm try to implement in ymm
 
 	; blue
-	pextrb r12, xmm0, 4
-	pinsrb xmm3, r12, 1
+	push rax
+	push rdx
+	pextrb rax, xmm0, 0
+	div three ; now works, but better to it as detailed above
+	pinsrb xmm3, rax, 0
+	pop rdx
+	pop rax
 	; green
-	pextrb r12, xmm0, 5
-	pinsrb xmm2, r12, 1
+	push rax
+	push rdx
+	pextrb rax, xmm0, 1
+	div three
+	pinsrb xmm2, rax, 0
+	pop rdx
+	pop rax
 	; red
-	pextrb r12, xmm0, 6
-	pinsrb xmm1, r12, 1
+	push rax
+	push rdx
+	pextrb rax, xmm0, 2
+	div three
+	pinsrb xmm1, rax, 0
+	pop rdx
+	pop rax
 
 	; blue
-	pextrb r12, xmm0, 8
-	pinsrb xmm3, r12, 2
+	push rax
+	push rdx
+	pextrb rax, xmm0, 4
+	div three
+	pinsrb xmm3, rax, 1
+	pop rdx
+	pop rax
 	; green
-	pextrb r12, xmm0, 9
-	pinsrb xmm2, r12, 2
+	push rax
+	push rdx
+	pextrb rax, xmm0, 5
+	div three
+	pinsrb xmm2, rax, 1
+	pop rdx
+	pop rax
 	; red
-	pextrb r12, xmm0, 10
-	pinsrb xmm1, r12, 2
+	push rax
+	push rdx
+	pextrb rax, xmm0, 6
+	div three
+	pinsrb xmm1, rax, 1
+	pop rdx
+	pop rax
 
 	; blue
-	pextrb r12, xmm0, 12
-	pinsrb xmm3, r12, 3
+	push rax
+	push rdx
+	pextrb rax, xmm0, 8
+	div three
+	pinsrb xmm3, rax, 2
+	pop rdx
+	pop rax
 	; green
-	pextrb r12, xmm0, 13
-	pinsrb xmm2, r12, 3
+	push rax
+	push rdx
+	pextrb rax, xmm0, 9
+	div three
+	pinsrb xmm2, rax, 2
+	pop rdx
+	pop rax
 	; red
-	pextrb r12, xmm0, 14
-	pinsrb xmm1, r12, 3
+	push rax
+	push rdx
+	pextrb rax, xmm0, 10
+	div three
+	pinsrb xmm1, rax, 2
+	pop rdx
+	pop rax
 
-	vmovupd xmm4, three
-	cvtdq2pd xmm4, xmm4
+	; blue
+	push rax
+	push rdx
+	pextrb rax, xmm0, 12
+	div three
+	pinsrb xmm3, rax, 3
+	pop rdx
+	pop rax
+	; green
+	push rax
+	push rdx
+	pextrb rax, xmm0, 13
+	div three
+	pinsrb xmm2, rax, 3
+	pop rdx
+	pop rax
+	; red
+	push rax
+	push rdx
+	pextrb rax, xmm0, 14
+	div three
+	pinsrb xmm1, rax, 3
+	pop rdx
+	pop rax
 
-	cvtdq2pd xmm1, xmm1
-	cvtdq2pd xmm2, xmm2
-	cvtdq2pd xmm3, xmm3
-	divpd xmm1, xmm4	;
-	divpd xmm2, xmm4	; division returns wrogn results for xmm2 and xmm3
-	divpd xmm3, xmm4	;
-	cvtpd2dq xmm1, xmm1
-	cvtpd2dq xmm2, xmm2
-	cvtpd2dq xmm3, xmm3
+	vpaddb xmm1, xmm1, xmm2
+	vpaddb xmm1, xmm1, xmm3
 
 	;
 	;
