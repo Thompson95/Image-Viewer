@@ -7,14 +7,15 @@ middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
+redMask byte 4 dup(000h, 000h, 0FFh, 000h)
+greenMask byte 4 dup(000h, 0FFh, 000h, 000h)
+blueMask byte 4 dup(0FFh, 000h, 000h, 000h)
 colour qword 001h
 val3 DWORD 2 dup(3.0)
 val255 byte 1 dup(0FFh)
 greenLimit DWORD 2 dup(195.0)
 redLimit DWORD 2 dup(225.0)
-nextbit qword 004h
-scale qword 100h
-three byte 1 dup(003h)
+three qword 003h
 
 .code
 asmNegativeFilter proc
@@ -124,7 +125,7 @@ asmSepiaFilter proc
 	jmp loopEnd
 
 loopStart :
-	sub r10, nextbit ; there is enough bits left to be processed
+	sub r10, treshold ; there is enough bits left to be processed
 
 	; xmm1 ; red
 	; xmm2 ; green
@@ -146,6 +147,31 @@ loopStart :
 	; using masks detect where R and G are greater than thresholds and set them to 255 there
 	; when implemented in xmm try to implement in ymm
 
+	vmovupd xmm1, xmm0
+	vmovupd xmm2, xmm0
+	vmovupd xmm3, xmm0
+
+	vmovupd xmm4, xmmword ptr[redMask]
+	vmovupd xmm5, xmmword ptr[greenMask]
+	vmovupd xmm6, xmmword ptr[blueMask]
+
+	pminub xmm1, xmm4 ; red
+	pminub xmm2, xmm5 ; green
+	pminub xmm3, xmm6 ; blue
+
+	psrldq xmm1, 2 ; shift red twice
+	psrldq xmm2, 1 ; shift green once
+
+	addpd xmm1, xmm2
+	addpd xmm1, xmm3
+
+	vmovupd xmm3, xmmword ptr[three] 
+
+	vdivss xmm7, xmm1, xmm3 ; how to divide xmm1 by 3 word-wise?
+
+	;
+	;
+	; obsolete code
 	; blue
 	push rax
 	push rdx
@@ -268,7 +294,6 @@ loopStart :
 	pextrb r14, xmm0, 2
 	pextrb r15, xmm0, 3
 	movd xmm2, r12
-	vmovupd xmm3, scale
 	cvtdq2ps xmm2, xmm2		;
 	cvtdq2ps xmm3, xmm3		; cvtdq2ps and cvtps2dq are used to multiply registers using mulps
 	mulps xmm2, xmm3		; otherwise mulps returns 0 regardless of contents of registers
@@ -306,9 +331,9 @@ greensGood :
 redsGood :
 	vmovupd xmmword ptr[rcx + r10], xmm1 ; red
 
-	add r10, nextbit	; should be treshold!!
+	add r10, treshold	; should be treshold!!
 loopEnd :
-	add r10, nextbit	; test if there is 16 more bits in image
+	add r10, treshold	; test if there is 16 more bits in image
 	cmp r10, r9
 	jle loopStart		; is yes, loop
 	mov rbx, r11		; if not, end processing the image
