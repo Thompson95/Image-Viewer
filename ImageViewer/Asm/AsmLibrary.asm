@@ -16,7 +16,7 @@ val3 DWORD 2 dup(3.0)
 val255 byte 1 dup(0FFh)
 greenLimit DWORD 2 dup(195.0)
 redLimit DWORD 2 dup(225.0)
-three byte 4 dup(003h, 000h, 000h, 000h)
+three dword 1 dup(3.0, 3.0, 3.0, 3.0)
 bitMask byte 1 dup(0FFh, 0FFh, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h)
 
 
@@ -153,24 +153,40 @@ loopStart :
 	vmovups xmm1, xmm0
 	vmovups xmm2, xmm0
 	vmovups xmm3, xmm0
+	vmovups xmm4, xmm0
 
-	vmovups xmm4, xmmword ptr[redMask]
-	vmovups xmm5, xmmword ptr[greenMask]
-	vmovups xmm6, xmmword ptr[blueMask]
-
-	pminub xmm1, xmm4 ; red
-	pminub xmm2, xmm5 ; green
-	pminub xmm3, xmm6 ; blue
-
-	psrldq xmm1, 2 ; shift red two bits
-	psrldq xmm2, 1 ; shift green one bit
-
-	addps xmm1, xmm2
-	addps xmm1, xmm3
-
-	vmovups xmm3, xmmword ptr[three]
+	vmovups xmm5, xmmword ptr[negAlphaMask] ; inconsistent naming scheme stems from different teams working on different filters
+	vmovups xmm6, xmmword ptr[redMask]
+	vmovups xmm7, xmmword ptr[greenMask]
+	vmovups xmm8, xmmword ptr[blueMask]
 	
-	vdivps xmm1, xmm1, xmm3
+	pminub xmm1, xmm5 ; alpha
+	pminub xmm2, xmm6 ; red
+	pminub xmm3, xmm7 ; green
+	pminub xmm4, xmm8 ; blue
+
+	psrldq xmm2, 2 ; shift red two bits
+	psrldq xmm3, 1 ; shift green one bit
+
+	vaddps xmm0, xmm2, xmm3
+	vaddps xmm0, xmm0, xmm4
+
+	vmovups xmm3, three ; xmm3 value needs not be kept after this point, it can be used for something else
+
+	cvtdq2ps xmm0, xmm0
+	vdivps xmm0, xmm0, xmm3
+	cvtps2dq xmm0, xmm0
+	
+	movups xmm4, xmm0 ; blue
+	pslldq xmm0, 1
+	movups xmm3, xmm0 ; green
+	pslldq xmm0, 1 ; red
+	
+	vpaddb xmm0, xmm0, xmm3
+	vpaddb xmm0, xmm0, xmm4
+	vpaddb xmm0, xmm0, xmm1 ; alpha
+
+
 
 	;
 	;
