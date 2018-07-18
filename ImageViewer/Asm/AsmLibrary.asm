@@ -7,6 +7,7 @@ middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
+
 redMask byte 4 dup(000h, 000h, 0FFh, 000h)
 greenMask byte 4 dup(000h, 0FFh, 000h, 000h)
 blueMask byte 4 dup(0FFh, 000h, 000h, 000h)
@@ -15,7 +16,9 @@ val3 DWORD 2 dup(3.0)
 val255 byte 1 dup(0FFh)
 greenLimit DWORD 2 dup(195.0)
 redLimit DWORD 2 dup(225.0)
-three qword 003h
+three byte 4 dup(003h, 000h, 000h, 000h)
+bitMask byte 1 dup(0FFh, 0FFh, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h)
+
 
 .code
 asmNegativeFilter proc
@@ -136,7 +139,7 @@ loopStart :
 	; the sequence in which the colours are coming is actually blue, green, red, alpha
 	; alpha is ignored both in extraction and rewriting of colour so it stays the same
 
-	vmovupd xmm0, xmmword ptr[rcx+r10] ; taking 16 bytes from the bitmap - that's 4 bits, each having R, G, B and alpha value
+	vmovups xmm0, xmmword ptr[rcx+r10] ; taking 16 bytes from the bitmap - that's 4 bits, each having R, G, B and alpha value
 
 	; diagram is on the photo in the phone
 	; use masks to transform xmm0 into xmm1, xmm2 and xmm3 containing R, G and B
@@ -147,27 +150,56 @@ loopStart :
 	; using masks detect where R and G are greater than thresholds and set them to 255 there
 	; when implemented in xmm try to implement in ymm
 
-	vmovupd xmm1, xmm0
-	vmovupd xmm2, xmm0
-	vmovupd xmm3, xmm0
+	vmovups xmm1, xmm0
+	vmovups xmm2, xmm0
+	vmovups xmm3, xmm0
 
-	vmovupd xmm4, xmmword ptr[redMask]
-	vmovupd xmm5, xmmword ptr[greenMask]
-	vmovupd xmm6, xmmword ptr[blueMask]
+	vmovups xmm4, xmmword ptr[redMask]
+	vmovups xmm5, xmmword ptr[greenMask]
+	vmovups xmm6, xmmword ptr[blueMask]
 
 	pminub xmm1, xmm4 ; red
 	pminub xmm2, xmm5 ; green
 	pminub xmm3, xmm6 ; blue
 
-	psrldq xmm1, 2 ; shift red twice
-	psrldq xmm2, 1 ; shift green once
+	psrldq xmm1, 2 ; shift red two bits
+	psrldq xmm2, 1 ; shift green one bit
 
-	addpd xmm1, xmm2
-	addpd xmm1, xmm3
+	addps xmm1, xmm2
+	addps xmm1, xmm3
 
-	vmovupd xmm3, xmmword ptr[three] 
+	vmovups xmm5, xmmword ptr[three]
+	vmovups xmm7, xmmword ptr[bitMask]
 
-	vdivss xmm7, xmm1, xmm3 ; how to divide xmm1 by 3 word-wise?
+	vdivps xmm1, xmm1, xmm5
+	vdivps xmm2, xmm2, xmm5
+	vdivps xmm3, xmm3, xmm5
+	vdivps xmm4, xmm4, xmm5
+
+	;
+	;
+	;
+	; this is sisd, we're doing simd
+
+	vpminub xmm4, xmm1, xmm7
+	psrldq xmm1, 4
+	vpminub xmm3, xmm1, xmm7
+	psrldq xmm1, 4
+	vpminub xmm2, xmm1, xmm7
+	psrldq xmm1, 4
+
+	vdivps xmm1, xmm1, xmm5
+	vdivps xmm2, xmm2, xmm5
+	vdivps xmm3, xmm3, xmm5
+	vdivps xmm4, xmm4, xmm5
+
+	pslldq xmm2, 4
+	pslldq xmm3, 8
+	pslldq xmm4, 12
+
+	addps xmm1, xmm2
+	addps xmm1, xmm3
+	addps xmm1, xmm4
 
 	;
 	;
