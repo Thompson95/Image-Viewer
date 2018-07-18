@@ -168,13 +168,9 @@ loopStart :
 	addps xmm1, xmm2
 	addps xmm1, xmm3
 
-	vmovups xmm5, xmmword ptr[three]
-	vmovups xmm7, xmmword ptr[bitMask]
-
-	vdivps xmm1, xmm1, xmm5
-	vdivps xmm2, xmm2, xmm5
-	vdivps xmm3, xmm3, xmm5
-	vdivps xmm4, xmm4, xmm5
+	vmovups xmm3, xmmword ptr[three]
+	
+	vdivps xmm1, xmm1, xmm3
 
 	;
 	;
