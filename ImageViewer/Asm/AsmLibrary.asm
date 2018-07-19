@@ -185,11 +185,11 @@ loopStart :
 
 loopEnd :
 	add r10, treshold
-	cmp r10, r9			; test if there is 16 more bits in image (4 pixels)
-	jle loopStart		; is yes, loop
+	cmp r10, r9				; test if there is 16 more bits in image (4 pixels)
+	jle loopStart			; is yes, loop
 	
-	mov rbx, r11		; if not, end processing the image
-	ret					; this will leave up to 3 unprocessed pixels in images with number of pixels indivisible by 4, but will guarantee bitmap of any size can be processed
+	mov rbx, r11			; if not, end processing the image
+	ret						; this will leave up to 3 unprocessed pixels in images with number of pixels indivisible by 4, but will guarantee bitmap of any size can be processed
 
 asmSepiaFilter endp
 end
