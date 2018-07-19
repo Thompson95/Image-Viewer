@@ -1,23 +1,18 @@
 .data
-alphaMask byte 4 dup(0FFh, 0FFh, 0FFh, 000h) ; 255, 255, 255, 0
-negAlphaMask byte 4 dup(000h, 000h, 000h, 0FFh) ; 0, 0, 0, 255
-array255 byte 16 dup(0FFh) ; 255
-treshold qword 010h ; 16
+alphaMask byte 4 dup(0FFh, 0FFh, 0FFh, 000h)
+negAlphaMask byte 4 dup(000h, 000h, 000h, 0FFh)
+array255 byte 16 dup(0FFh)
+treshold qword 010h
 middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
-
 redMask byte 4 dup(000h, 000h, 0FFh, 000h)
 greenMask byte 4 dup(000h, 0FFh, 000h, 000h)
 blueMask byte 4 dup(0FFh, 000h, 000h, 000h)
-colour qword 001h
-val3 DWORD 2 dup(3.0)
-val255 byte 1 dup(0FFh)
 three dword 4 dup(3.0)
 thirty dword 4 dup(30.0)
 limit dword 1 dup(255.0, 255.0, 255.0, 255.0)
-bitMask byte 4 dup(0FFh, 0FFh, 000h, 000h)
 
 
 .code
@@ -113,82 +108,88 @@ asmContrastFilter endp
 
 
 asmSepiaFilter proc
-	; parameters processing
-	mov r9, rdx		; size
-	mov r11, rbx	; bitmap
+	; parameters
+	mov r9, rdx				; size
+	mov r11, rbx			; bitmap
 
 	; setup
-	mov r10, 0			; current position in bitmap
+	mov r10, 0				; current position in bitmap
 
 	jmp loopEnd
 
 loopStart :
-	sub r10, treshold ; there is enough bits left to be processed
+	sub r10, treshold		; there is enough bits left to be processed
 
-	vmovups xmm0, xmmword ptr[rcx+r10] ; taking 16 bytes from the bitmap - that's 4 bits per pixel, values RGBA
-	; actual sequence of values in register: ARGB ARGB ARGB ARGB
+	vmovups xmm0, xmmword ptr[rcx+r10]	; taking 16 bytes from the bitmap - that's 4 bits per pixel, values RGBA
+	; actual sequence of values in register: ARGB ARGB ARGB ARGB for image bit #4 #3 #2 #1
 
 	vmovups xmm1, xmm0
 	vmovups xmm2, xmm0
 	vmovups xmm3, xmm0
 	vmovups xmm4, xmm0
 
-	vmovups xmm5, xmmword ptr[negAlphaMask] ; inconsistent naming scheme stems from different teams working on different filters, but this is the exact mask needed here so we'll take it
+	; extraction masks
+	vmovups xmm5, xmmword ptr[negAlphaMask]	; inconsistent naming scheme stems from different teams working on different filters, but this is the exact mask needed here so we'll take it
 	vmovups xmm6, xmmword ptr[redMask]
 	vmovups xmm7, xmmword ptr[greenMask]
 	vmovups xmm8, xmmword ptr[blueMask]
 	
-	pminub xmm1, xmm5 ; alpha
-	pminub xmm2, xmm6 ; red
-	pminub xmm3, xmm7 ; green
-	pminub xmm4, xmm8 ; blue
+	; extract
+	pminub xmm1, xmm5		; alpha
+	pminub xmm2, xmm6		; red
+	pminub xmm3, xmm7		; green
+	pminub xmm4, xmm8		; blue
 
-	psrldq xmm2, 2 ; shift red two bits
-	psrldq xmm3, 1 ; shift green one bit
+	; align R and G values with B for addition
+	psrldq xmm2, 2			; shift red two bits to right
+	psrldq xmm3, 1			; shift green one bit to right
 
+	; R + B + G
 	vaddps xmm0, xmm2, xmm3
 	vaddps xmm0, xmm0, xmm4
 
-	vmovups xmm3, three ; xmm3 value needs not be kept after this point, it can be used for something else
+	vmovups xmm3, three		; xmm3 value needs not be kept after this point, it can be used for something else
 
-	cvtdq2ps xmm0, xmm0
-	vdivps xmm0, xmm0, xmm3
+	cvtdq2ps xmm0, xmm0		; convert sum of RGB to float to perform division (averaging RGB values, greyscale)
+	vdivps xmm0, xmm0, xmm3	; divide by 3
 	
+	; set new RGB values to average of old RGB values, colorizing greyscale into sepia by increasing green by 30 and red by 60 (limited by 255 obviously)
 	; blue
-	movups xmm4, xmm0
-	cvtps2dq xmm4, xmm4
+	vmovups xmm4, xmm0
+	cvtps2dq xmm4, xmm4		; conversion from float back to integer
 	
-	vmovups xmm5, limit
-	vmovups xmm6, thirty
+	vmovups xmm5, limit		; limit by 255
+	vmovups xmm6, thirty	; +30
 	
 	; green
 	vaddps xmm0, xmm0, xmm6
-	movups xmm3, xmm0
-	minps xmm3, xmm5
+	vmovups xmm3, xmm0
+	vminps xmm3, xmm3, xmm5
 	cvtps2dq xmm3, xmm3
-	pslldq xmm3, 1
+	pslldq xmm3, 1			; shift green back by 1 bit
 	
 	; red
 	vaddps xmm0, xmm0, xmm6
-	movups xmm2, xmm0
-	minps xmm2, xmm5
+	vmovups xmm2, xmm0
+	vminps xmm2, xmm2, xmm5
 	cvtps2dq xmm2, xmm2
-	pslldq xmm2, 2
+	pslldq xmm2, 2			; shift red back by 2 bits
 	
-	vpaddb xmm0, xmm1, xmm2 ; alpha + red
-	vpaddb xmm0, xmm0, xmm3 ; + green
-	vpaddb xmm0, xmm0, xmm4 ; + blue
-	; xmm0 is ready to be returned to bitmap
+	vpaddb xmm0, xmm1, xmm2	; alpha + red
+	vpaddb xmm0, xmm0, xmm3	; + green
+	vpaddb xmm0, xmm0, xmm4	; + blue
 
-	vmovups xmmword ptr[rcx+r10], xmm0 ; returns modified pixels back
+	vmovups xmmword ptr[rcx+r10], xmm0 ; returns modified pixels back to bitmap
 
-	add r10, treshold
+	add r10, treshold		; next loop
+
 loopEnd :
-	add r10, treshold	; test if there is 16 more bits in image (4 pixels)
-	cmp r10, r9
+	add r10, treshold
+	cmp r10, r9			; test if there is 16 more bits in image (4 pixels)
 	jle loopStart		; is yes, loop
+	
 	mov rbx, r11		; if not, end processing the image
-	ret					; this will leave between 0 to 15 last bits unprocessed if number of bits in the bitmap is not a multiple of 16 (4 pixels)
+	ret					; this will leave up to 3 unprocessed pixels in images with number of pixels indivisible by 4, but will guarantee bitmap of any size can be processed
 
 asmSepiaFilter endp
 end
