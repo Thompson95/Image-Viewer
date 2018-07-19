@@ -15,11 +15,10 @@ colour qword 001h
 val3 DWORD 2 dup(3.0)
 val255 byte 1 dup(0FFh)
 three dword 4 dup(3.0)
-bitMask byte 1 dup(0FFh, 0FFh, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h)
 thirty dword 4 dup(30.0)
-sixty dword 4 dup(60.0)
-greenLimit dword 4 dup(225.0)
-redLimit dword 4 dup(295.0)
+limit dword 1 dup(255.0, 255.0, 255.0, 255.0)
+bitMask byte 4 dup(0FFh, 0FFh, 000h, 000h)
+
 
 .code
 asmNegativeFilter proc
@@ -178,30 +177,30 @@ loopStart :
 	vdivps xmm0, xmm0, xmm3
 	;cvtps2dq xmm0, xmm0
 	
-	;blue
+	; blue
 	movups xmm4, xmm0
 	cvtps2dq xmm4, xmm4
 	
-	;green
-	vmovups xmm5, greenLimit
-	vcmpltps xmm7, xmm0, xmm5
-	vmaxps xmm0, xmm0, xmm7
-	vmovups xmm3, thirty
-	; ??? add 30 to G value but limit result to 255 max
-	vmaxps xmm3, xmm3, xmm7
-	vaddps xmm0, xmm0, xmm3
+	vmovups xmm5, limit
+	vmovups xmm6, thirty
+	
+	; green
+	vaddps xmm0, xmm0, xmm6
 	movups xmm3, xmm0
+	minps xmm3, xmm5
 	cvtps2dq xmm3, xmm3
 	pslldq xmm3, 1
-
-	;red
-	pslldq xmm0, 1
-	cvtps2dq xmm0, xmm0
-	pslldq xmm0, 2
-
+	
+	; red
+	vaddps xmm0, xmm0, xmm6
+	movups xmm2, xmm0
+	minps xmm2, xmm5
+	cvtps2dq xmm2, xmm2
+	pslldq xmm2, 2
+	
+	vpaddb xmm0, xmm1, xmm2
 	vpaddb xmm0, xmm0, xmm3
 	vpaddb xmm0, xmm0, xmm4
-	vpaddb xmm0, xmm0, xmm1 ; alpha
 
 	; xmm is ready to be returned to bitmap
 
@@ -379,14 +378,14 @@ loopStart :
 	sub r10, colour ; green to red
 	vmovupd xmmword ptr [rcx + r10], xmm1 ; red
 	vmovupd xmm1, xmm0
-	vmovups xmm3, greenLimit
+	vmovups xmm3, limit
 	cmpps xmm1, xmm3, 6
 	jl tooMuchGreen
 greensGood : 
 	vmovupd xmmword ptr[rcx + r10], xmm1 ; green
 	sub r10, colour ; green to red
 	vmovupd xmm1, xmm0
-	vmovups xmm3, redLimit
+	vmovups xmm3, limit
 	cmpps xmm1, xmm3, 6
 	jl tooMuchRed
 redsGood :
