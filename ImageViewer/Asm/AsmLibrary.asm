@@ -7,12 +7,13 @@ middle DWORD 8 dup(128.0)
 masktable DWORD 2 dup(-0.0, -0.0, -0.0, 0.0)
 highval DWORD 8 dup(255.0)
 lowval DWORD 8 dup(0.0)
-redMask byte 4 dup(000h, 000h, 0FFh, 000h)
-greenMask byte 4 dup(000h, 0FFh, 000h, 000h)
-blueMask byte 4 dup(0FFh, 000h, 000h, 000h)
-three dword 4 dup(3.0)
-thirty dword 4 dup(30.0)
-limit dword 1 dup(255.0, 255.0, 255.0, 255.0)
+alphaMaskAVX byte 8 dup(000h, 000h, 000h, 0FFh)
+redMask byte 8 dup(000h, 000h, 0FFh, 000h)
+greenMask byte 8 dup(000h, 0FFh, 000h, 000h)
+blueMask byte 8 dup(0FFh, 000h, 000h, 000h)
+three dword 8 dup(3.0)
+thirty dword 8 dup(30.0)
+limit dword 8 dup(255.0)
 
 
 .code
@@ -119,8 +120,8 @@ asmSepiaFilter proc
 
 loopStart :
 	sub r10, treshold			; there is enough bits left to be processed
+	sub r10, treshold			; treshold is 16, step for AVX is 32
 
-	vmovups xmm1, xmmword ptr[rcx+r10]
 	vmovups ymm0, ymmword ptr[rcx+r10]	; taking 32 bits from the bitmap - that's 4 bits per pixel, values RGBA
 	; actual sequence of values in register: ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB for image bit #8 #7 #6 #5 #4 #3 #2 #1
 
@@ -130,7 +131,7 @@ loopStart :
 	vmovups ymm4, ymm0
 
 	; extraction masks
-	vmovups ymm5, ymmword ptr[negAlphaMask]	; inconsistent naming scheme stems from different teams working on different filters, but this is the exact mask needed here so we'll take it
+	vmovups ymm5, ymmword ptr[alphaMaskAVX]
 	vmovups ymm6, ymmword ptr[redMask]
 	vmovups ymm7, ymmword ptr[greenMask]
 	vmovups ymm8, ymmword ptr[blueMask]
@@ -154,7 +155,7 @@ loopStart :
 	vcvtdq2ps ymm0, ymm0		; convert sum of RGB to float to perform division (averaging RGB values, greyscale)
 	vdivps ymm0, ymm0, ymm3		; divide by 3
 	
-	; set new RGB values to average of old RGB values, colorizing greyscale into sepia by increasing green by 30 and red by 60 (limited by 255 obviously)
+	; set new RGB values to average of old RGB values, colorizing greyscale into sepia by increasing green by 30 and red by 60 (limited by 255 of course)
 	; blue
 	vmovups ymm4, ymm0
 	vcvtps2dq ymm4, ymm4		; conversion from float back to integer
