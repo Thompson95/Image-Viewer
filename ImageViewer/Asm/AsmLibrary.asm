@@ -12,8 +12,7 @@ redMask byte 8 dup(000h, 000h, 0FFh, 000h)
 greenMask byte 8 dup(000h, 0FFh, 000h, 000h)
 blueMask byte 8 dup(0FFh, 000h, 000h, 000h)
 three dword 8 dup(3.0)
-thirty dword 8 dup(30.0)
-limit dword 8 dup(255.0)
+thirty byte 8 dup(01Eh, 000h, 000h, 000h)
 
 
 .code
@@ -122,19 +121,19 @@ loopStart :
 	sub r10, treshold			; there is enough bits left to be processed
 	sub r10, treshold			; treshold is 16, step for AVX is 32
 
-	vmovups ymm0, ymmword ptr[rcx+r10]	; taking 32 bits from the bitmap - that's 4 bits per pixel, values RGBA
+	vmovdqu ymm0, ymmword ptr[rcx+r10]	; taking 32 bits from the bitmap - that's 4 bits per pixel, values RGBA
 	; actual sequence of values in register: ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB for image bit #8 #7 #6 #5 #4 #3 #2 #1
 
-	vmovups ymm1, ymm0
-	vmovups ymm2, ymm0
-	vmovups ymm3, ymm0
-	vmovups ymm4, ymm0
+	vmovdqu ymm1, ymm0
+	vmovdqu ymm2, ymm0
+	vmovdqu ymm3, ymm0
+	vmovdqu ymm4, ymm0
 
 	; extraction masks
-	vmovups ymm5, ymmword ptr[alphaMaskAVX]
-	vmovups ymm6, ymmword ptr[redMask]
-	vmovups ymm7, ymmword ptr[greenMask]
-	vmovups ymm8, ymmword ptr[blueMask]
+	vmovdqu ymm5, ymmword ptr[alphaMaskAVX]
+	vmovdqu ymm6, ymmword ptr[redMask]
+	vmovdqu ymm7, ymmword ptr[greenMask]
+	vmovdqu ymm8, ymmword ptr[blueMask]
 	
 	; extract
 	vpminub ymm1, ymm1, ymm5	; alpha
@@ -154,34 +153,33 @@ loopStart :
 
 	vcvtdq2ps ymm0, ymm0		; convert sum of RGB to float to perform division (averaging RGB values, greyscale)
 	vdivps ymm0, ymm0, ymm3		; divide by 3
+	vcvtps2dq ymm0, ymm0		; conversion from float back to integer
+
 	
 	; set new RGB values to average of old RGB values, colorizing greyscale into sepia by increasing green by 30 and red by 60 (limited by 255 of course)
 	; blue
-	vmovups ymm4, ymm0
-	vcvtps2dq ymm4, ymm4		; conversion from float back to integer
+	vmovdqu ymm4, ymm0
 	
-	vmovups ymm5, limit			; limit by 255
-	vmovups ymm6, thirty		; +30
+	vmovdqu ymm5, ymmword ptr[blueMask]	; limit by 255, the same data as blueMask
+	vmovdqu ymm6, ymmword ptr[thirty]	; +30
 	
 	; green
 	vaddps ymm0, ymm0, ymm6
-	vmovups ymm3, ymm0
-	vminps ymm3, ymm3, ymm5
-	vcvtps2dq ymm3, ymm3
+	vmovdqu ymm3, ymm0
+	vpminsd ymm3, ymm3, ymm5
 	vpslldq ymm3, ymm3, 1		; shift green back by 1 bit
 	
 	; red
 	vaddps ymm0, ymm0, ymm6
-	vmovups ymm2, ymm0
-	vminps ymm2, ymm2, ymm5
-	vcvtps2dq ymm2, ymm2
+	vmovdqu ymm2, ymm0
+	vpminsd ymm2, ymm2, ymm5
 	vpslldq ymm2, ymm2, 2		; shift red back by 2 bits
 	
 	vpaddb ymm0, ymm1, ymm2		; alpha + red
 	vpaddb ymm0, ymm0, ymm3		; + green
 	vpaddb ymm0, ymm0, ymm4		; + blue
 
-	vmovups ymmword ptr[rcx+r10], ymm0 ; returns modified pixels back to bitmap
+	vmovdqu ymmword ptr[rcx+r10], ymm0 ; returns modified pixels back to bitmap
 
 	add r10, treshold			; next loop
 	add r10, treshold			; treshold is 16, we move 32 on AVX
