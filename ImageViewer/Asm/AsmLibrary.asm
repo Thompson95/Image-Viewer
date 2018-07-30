@@ -119,9 +119,9 @@ asmSepiaFilter proc
 
 loopStart :
 	sub r10, treshold			; there is enough bits left to be processed
-	sub r10, treshold			; treshold is 16, step for AVX is 32
+	sub r10, treshold			; treshold is 16, step for AVX is 32, but we save memory by reusing the data from another filter
 
-	vmovdqu ymm0, ymmword ptr[rcx+r10]	; taking 32 bits from the bitmap - that's 4 bits per pixel, values RGBA
+	vmovdqu ymm0, ymmword ptr[rcx+r10]	; taking 32 bits from the bitmap - that's 4 bytes per pixel, values RGBA
 	; actual sequence of values in register: ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB for image bit #8 #7 #6 #5 #4 #3 #2 #1
 
 	vmovdqu ymm1, ymm0
@@ -142,8 +142,8 @@ loopStart :
 	vpminub ymm4, ymm4, ymm8	; blue
 
 	; align R and G values with B for addition
-	vpsrldq ymm2, ymm2, 2		; shift red two bits to right
-	vpsrldq ymm3, ymm3, 1		; shift green one bit to right
+	vpsrldq ymm2, ymm2, 2		; shift red two positions to right
+	vpsrldq ymm3, ymm3, 1		; shift green one position to right
 
 	; R + B + G
 	vaddps ymm0, ymm2, ymm3
@@ -151,9 +151,9 @@ loopStart :
 
 	vmovups ymm3, three			; ymm3 value needs not be kept after this point, it can be used for something else
 
-	vcvtdq2ps ymm0, ymm0		; convert sum of RGB to float to perform division (averaging RGB values, greyscale)
+	vcvtdq2ps ymm0, ymm0		; convert sum of RGB to single-precision float to perform division (averaging RGB values, greyscale), no SIMD division for unsigned integers
 	vdivps ymm0, ymm0, ymm3		; divide by 3
-	vcvtps2dq ymm0, ymm0		; conversion from float back to integer
+	vcvtps2dq ymm0, ymm0		; conversion from float back to unsigned integer
 
 	
 	; set new RGB values to average of old RGB values, colorizing greyscale into sepia by increasing green by 30 and red by 60 (limited by 255 of course)
@@ -167,17 +167,18 @@ loopStart :
 	vaddps ymm0, ymm0, ymm6
 	vmovdqu ymm3, ymm0
 	vpminsd ymm3, ymm3, ymm5
-	vpslldq ymm3, ymm3, 1		; shift green back by 1 bit
+	vpslldq ymm3, ymm3, 1		; shift green back by 1 position
 	
 	; red
 	vaddps ymm0, ymm0, ymm6
 	vmovdqu ymm2, ymm0
 	vpminsd ymm2, ymm2, ymm5
-	vpslldq ymm2, ymm2, 2		; shift red back by 2 bits
+	vpslldq ymm2, ymm2, 2		; shift red back by 2 positions
 	
-	vpaddb ymm0, ymm1, ymm2		; alpha + red
-	vpaddb ymm0, ymm0, ymm3		; + green
-	vpaddb ymm0, ymm0, ymm4		; + blue
+	; putting colours into correct positions of new pixels
+	vpaddb ymm0, ymm1, ymm2
+	vpaddb ymm0, ymm0, ymm3
+	vpaddb ymm0, ymm0, ymm4
 
 	vmovdqu ymmword ptr[rcx+r10], ymm0 ; returns modified pixels back to bitmap
 
